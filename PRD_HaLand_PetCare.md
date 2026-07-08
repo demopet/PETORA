@@ -974,4 +974,3 @@ Disarankan agar seluruh item di atas dibahas dalam sesi *requirement clarificati
 
 ---
 
-*Dokumen ini merupakan hasil penyusunan ulang dan pengayaan (elaborasi struktur PRD standar) dari deskripsi fungsional HaLand PetCare, dengan pembaruan skema autentikasi menjadi Username + PIN untuk seluruh role dan penegasan aturan pendaftaran akun: seluruh akun staf (Admin Klinik, Dokter) hanya dapat didaftarkan oleh Owner, sedangkan akun Customer dapat didaftarkan oleh Owner maupun Admin Klinik. Bagian yang ditandai sebagai "usulan" belum tentu mencerminkan keputusan final dan perlu divalidasi bersama pemilik produk sebelum development dimulai.*
