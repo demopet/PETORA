@@ -1,11 +1,14 @@
 import { useState } from 'react'
-import { useDeletePet } from '../hooks/use-pets'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus, Search, Trash2, Edit } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { PetForm } from '../components/PetForm'
 import { usePets } from '../hooks/use-pets'
+import { useDeletePet } from '../hooks/use-pets'
+import { useCustomers } from '@/features/customers/hooks/use-customers'
 import type { Pet } from '@/types/pet'
 
 interface PetsPageProps {
@@ -14,7 +17,10 @@ interface PetsPageProps {
 
 export default function PetsPage({ customerId }: PetsPageProps) {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingPet, setEditingPet] = useState<Pet | null>(null)
   const { data: pets, isLoading, error } = usePets(customerId)
+  const { data: customers } = useCustomers()
   const deleteMutation = useDeletePet()
 
   const filteredPets = pets?.filter((pet) =>
@@ -26,6 +32,11 @@ export default function PetsPage({ customerId }: PetsPageProps) {
     if (confirm('Are you sure you want to delete this pet?')) {
       await deleteMutation.mutateAsync(id)
     }
+  }
+
+  const handleEdit = (pet: Pet) => {
+    setEditingPet(pet)
+    setFormOpen(true)
   }
 
   const columns = [
@@ -55,6 +66,9 @@ export default function PetsPage({ customerId }: PetsPageProps) {
       accessorKey: 'id' as const,
       cell: ({ original }: { original: Pet }) => (
         <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
+            <Edit className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -84,7 +98,7 @@ export default function PetsPage({ customerId }: PetsPageProps) {
             {filteredPets?.length || 0} pets
           </p>
         </div>
-        <Button>
+        <Button onClick={() => { setEditingPet(null); setFormOpen(true) }}>
           <Plus className="h-4 w-4" />
           Add Pet
         </Button>
@@ -113,13 +127,36 @@ export default function PetsPage({ customerId }: PetsPageProps) {
             title="No pets found"
             description="Get started by adding your first pet."
             action={
-              <Button>
+              <Button onClick={() => { setEditingPet(null); setFormOpen(true) }}>
                 <Plus className="h-4 w-4" />
                 Add Pet
               </Button>
             }
           />
         }
+      />
+
+      <PetForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={(_data) => {
+          if (editingPet) {
+            // update mutation
+          } else {
+            // create mutation
+          }
+        }}
+        customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
+        initialData={editingPet ? {
+          id: editingPet.id,
+          customer_id: editingPet.customer_id,
+          name: editingPet.name,
+          species: editingPet.species,
+          breed: editingPet.breed || undefined,
+          birth_date: editingPet.birth_date || undefined,
+          gender: editingPet.gender || undefined,
+          microchip_number: editingPet.microchip_number || undefined,
+        } : undefined}
       />
     </div>
   )

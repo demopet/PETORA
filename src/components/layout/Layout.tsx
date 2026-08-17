@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
+import type { UserRole } from '@/types/user'
 
 export default function Layout() {
   const { data: session, isLoading } = useQuery({
@@ -25,11 +26,14 @@ export default function Layout() {
     return <Navigate to="/login" replace />
   }
 
+  const userRole = session.user.user_metadata.role as UserRole
+  const userName = session.user.user_metadata.full_name as string
+
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar userRole={session.user.user_metadata.role as any} />
+      <Sidebar userRole={userRole} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar userName={session.user.user_metadata.full_name} userRole={session.user.user_metadata.role as any} />
+        <TopBar userName={userName} userRole={userRole} />
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

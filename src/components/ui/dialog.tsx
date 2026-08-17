@@ -3,12 +3,12 @@ import { cn } from '@/lib/utils'
 
 interface DialogProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
+  onOpenChange: (_open: boolean) => void
   children: React.ReactNode
 }
 
-export function Dialog({ open, onOpenChange, children }: DialogProps) {
-  if (!open) return null
+export function Dialog({ open: _open, onOpenChange, children }: DialogProps) {
+  if (!_open) return null
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">

@@ -5,12 +5,18 @@ import { StatusBadge } from '@/components/ui/status-badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { AppointmentForm } from '../components/AppointmentForm'
 import { useAppointments } from '../hooks/use-appointments'
+import { useCustomers } from '@/features/customers/hooks/use-customers'
+import { usePets } from '@/features/pets/hooks/use-pets'
 import type { Appointment } from '@/types/appointment'
 
 export default function AppointmentsPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
   const { data: appointments, isLoading, error } = useAppointments()
+  const { data: customers } = useCustomers()
+  const { data: pets } = usePets()
 
   const filteredAppointments = appointments?.filter((apt) =>
     apt.complaint?.toLowerCase().includes(search.toLowerCase()) ||
@@ -64,7 +70,7 @@ export default function AppointmentsPage() {
             {filteredAppointments?.length || 0} appointments
           </p>
         </div>
-        <Button>
+        <Button onClick={() => setFormOpen(true)}>
           <Plus className="h-4 w-4" />
           New Appointment
         </Button>
@@ -93,13 +99,24 @@ export default function AppointmentsPage() {
             title="No appointments found"
             description="Get started by creating your first appointment."
             action={
-              <Button>
+              <Button onClick={() => setFormOpen(true)}>
                 <Plus className="h-4 w-4" />
                 New Appointment
               </Button>
             }
           />
         }
+      />
+
+      <AppointmentForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={(_data) => {
+          // create mutation
+        }}
+        customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
+        pets={pets?.map(p => ({ id: p.id, name: p.name, customer_id: p.customer_id })) || []}
+        doctors={[]}
       />
     </div>
   )

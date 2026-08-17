@@ -1,16 +1,19 @@
 import { useState } from 'react'
-import { useArchiveProduct } from '../hooks/use-products'
-import { Plus, Search, Trash2 } from 'lucide-react'
+import { Plus, Search, Trash2, Edit } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { ProductForm } from '../components/ProductForm'
 import { useProducts } from '../hooks/use-products'
+import { useArchiveProduct } from '../hooks/use-products'
 import type { Product } from '@/types/product'
 
 export default function ProductsPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const { data: products, isLoading, error } = useProducts()
   const archiveMutation = useArchiveProduct()
 
@@ -23,6 +26,11 @@ export default function ProductsPage() {
     if (confirm('Are you sure you want to archive this product?')) {
       await archiveMutation.mutateAsync(id)
     }
+  }
+
+  const handleEdit = (product: Product) => {
+    setEditingProduct(product)
+    setFormOpen(true)
   }
 
   const columns = [
@@ -84,6 +92,13 @@ export default function ProductsPage() {
           <Button
             variant="ghost"
             size="icon"
+            onClick={() => handleEdit(original)}
+          >
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => handleArchive(original.id)}
           >
             <Trash2 className="h-4 w-4 text-danger-500" />
@@ -110,7 +125,7 @@ export default function ProductsPage() {
             {filteredProducts?.length || 0} products
           </p>
         </div>
-        <Button>
+        <Button onClick={() => { setEditingProduct(null); setFormOpen(true) }}>
           <Plus className="h-4 w-4" />
           Add Product
         </Button>
@@ -139,13 +154,42 @@ export default function ProductsPage() {
             title="No products found"
             description="Get started by adding your first product."
             action={
-              <Button>
+              <Button onClick={() => { setEditingProduct(null); setFormOpen(true) }}>
                 <Plus className="h-4 w-4" />
                 Add Product
               </Button>
             }
           />
         }
+      />
+
+      <ProductForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={(_data) => {
+          if (editingProduct) {
+            // update mutation
+          } else {
+            // create mutation
+          }
+        }}
+        categories={[]}
+        suppliers={[]}
+        initialData={editingProduct ? {
+          id: editingProduct.id,
+          sku: editingProduct.sku,
+          name: editingProduct.name,
+          category_id: editingProduct.category_id || undefined,
+          supplier_id: editingProduct.supplier_id || undefined,
+          barcode: editingProduct.barcode || undefined,
+          description: editingProduct.description || undefined,
+          purchase_price: editingProduct.purchase_price,
+          selling_price: editingProduct.selling_price,
+          stock_quantity: editingProduct.stock_quantity,
+          stock_minimum: editingProduct.stock_minimum,
+          stock_maximum: editingProduct.stock_maximum,
+          expiry_date: editingProduct.expiry_date || undefined,
+        } : undefined}
       />
     </div>
   )

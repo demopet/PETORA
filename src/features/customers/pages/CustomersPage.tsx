@@ -1,16 +1,20 @@
 import { useState } from 'react'
-import { useDeleteCustomer } from '../hooks/use-customers'
+import { useMutation } from '@tanstack/react-query'
 import { Plus, Search, Trash2, Edit, UserPlus } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { CustomerForm } from '../components/CustomerForm'
 import { useCustomers } from '../hooks/use-customers'
+import { useDeleteCustomer } from '../hooks/use-customers'
 import type { Customer } from '@/types/customer'
 
 export default function CustomersPage() {
   const [search, setSearch] = useState('')
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const { data: customers, isLoading, error } = useCustomers()
   const deleteMutation = useDeleteCustomer()
 
@@ -23,6 +27,11 @@ export default function CustomersPage() {
     if (confirm('Are you sure you want to delete this customer?')) {
       await deleteMutation.mutateAsync(id)
     }
+  }
+
+  const handleEdit = (customer: Customer) => {
+    setEditingCustomer(customer)
+    setFormOpen(true)
   }
 
   const columns = [
@@ -53,7 +62,7 @@ export default function CustomersPage() {
       accessorKey: 'id' as const,
       cell: ({ original }: { original: Customer }) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -85,7 +94,7 @@ export default function CustomersPage() {
             {filteredCustomers?.length || 0} customers
           </p>
         </div>
-        <Button>
+        <Button onClick={() => { setEditingCustomer(null); setFormOpen(true) }}>
           <Plus className="h-4 w-4" />
           Add Customer
         </Button>
@@ -114,13 +123,26 @@ export default function CustomersPage() {
             title="No customers found"
             description="Get started by adding your first customer."
             action={
-              <Button>
+              <Button onClick={() => { setEditingCustomer(null); setFormOpen(true) }}>
                 <Plus className="h-4 w-4" />
                 Add Customer
               </Button>
             }
           />
         }
+      />
+
+      <CustomerForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        onSubmit={(_data) => {
+          if (editingCustomer) {
+            // update mutation
+          } else {
+            // create mutation
+          }
+        }}
+        initialData={editingCustomer || undefined}
       />
     </div>
   )

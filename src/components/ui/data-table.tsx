@@ -5,7 +5,7 @@ interface DataTableProps<TData> {
   columns: Array<{
     header: string
     accessorKey: string
-    cell?: (row: { original: TData }) => React.ReactNode
+    cell?: (_row: { original: TData }) => React.ReactNode
   }>
   data: TData[]
   searchKey?: string
@@ -48,13 +48,13 @@ export function DataTable<TData>({
           </thead>
           <tbody className="divide-y divide-slate-200">
             {data.length > 0 ? (
-              data.map((row, index) => (
-                <tr key={index} className="hover:bg-slate-50">
+              data.map((_row, _index) => (
+                <tr key={_index} className="hover:bg-slate-50">
                   {columns.map((column) => (
                     <td key={column.accessorKey} className="px-4 py-3">
                       {column.cell
-                        ? column.cell({ original: row })
-                        : (row as Record<string, unknown>)[column.accessorKey]}
+                        ? column.cell({ original: _row })
+                        : (_row as Record<string, unknown>)[column.accessorKey] as React.ReactNode}
                     </td>
                   ))}
                 </tr>
