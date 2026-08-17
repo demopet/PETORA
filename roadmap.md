@@ -1,29 +1,101 @@
-# Roadmap Pengembangan Petora
+# Roadmap Implementasi Pengembangan Petora
 ## Sistem Manajemen Terpadu Petshop & Petcare
-### Dokumen Baseline Final | 18 Agustus 2026
+### Workflow Implementasi & Baseline Contract Specification | 18 Agustus 2026
+
+---
+
+## Status Dokumen
+
+Dokumen ini berfungsi sebagai `workflow implementasi pengembangan` utama untuk proyek Petora. Semua dokumen master berperan sebagai `baseline contract specification` yang memegang aturan teknis, arsitektur, antarmuka, modul, dan kualitas produk.
+
+### Dokumen Master Sebagai Contract Baseline
+- `master-arsitektur.md` = Spesifikasi arsitektur sistem dan kontrak teknis platform
+- `master-spesifikasi-frontend.md` = Spesifikasi UI/UX, design system, dan frontend contract
+- `master-spesifikasii-modul.md` = Spesifikasi modul bisnis dan workflow fitur per domain
+- `master-test-cidi.md` = Spesifikasi testing, quality gates, dan pipeline CI/CD
+
+### Prinsip Penggunaan
+1. `roadmap.md` menentukan urutan dan aliran implementasi pengembangan.
+2. Dokumen master menjadi sumber kebenaran kontrak baseline yang tidak boleh dilanggar tanpa review perubahan.
+3. Setiap fase pengembangan harus menghasilkan deliverable yang terukur dan sesuai dengan contract baseline.
+4. Jika terjadi perubahan kebutuhan atau kontrak, maka perubahan harus tercatat di dokumen master terlebih dahulu, lalu di-sinkronkan ke roadmap.
+5. Roadmap bukan sekadar jadwal, tetapi mekanisme kontrol progres implementasi yang mengarah ke produk final yang konsisten dengan spesifikasi.
 
 ---
 
 ## Daftar Isi
 1. [Overview Roadmap](#1-overview-roadmap)
-2. [Phase 0: Foundation & Setup](#2-phase-0-foundation--setup)
-3. [Phase 1: Auth & User Management](#3-phase-1-auth--user-management)
-4. [Phase 2: Core CRM (Customers & Pets)](#4-phase-2-core-crm-customers--pets)
-5. [Phase 3: Appointments & Medical Records](#5-phase-3-appointments--medical-records)
-6. [Phase 4: Pet Hotel & Grooming](#6-phase-4-pet-hotel--grooming)
-7. [Phase 5: Petshop & Inventory](#7-phase-5-petshop--inventory)
-8. [Phase 6: POS & Billing](#8-phase-6-pos--billing)
-9. [Phase 7: Loyalty & Promotions](#9-phase-7-loyalty--promotions)
-10. [Phase 8: Finance & Reports](#10-phase-8-finance--reports)
-11. [Phase 9: Customer Portal](#11-phase-9-customer-portal)
-12. [Phase 10: Integration & Testing](#12-phase-10-integration--testing)
-13. [Phase 11: Deployment & Launch](#13-phase-11-deployment--launch)
-14. [Matrik Definition of Done Global](#14-matrik-definition-of-done-global)
-15. [Dependency Matrix](#15-dependency-matrix)
+2. [Contract Baseline Governance](#2-contract-baseline-governance)
+3. [Phase 0: Foundation & Setup](#3-phase-0-foundation--setup)
+4. [Phase 1: Auth & User Management](#4-phase-1-auth--user-management)
+5. [Phase 2: Core CRM (Customers & Pets)](#5-phase-2-core-crm-customers--pets)
+6. [Phase 3: Appointments & Medical Records](#6-phase-3-appointments--medical-records)
+7. [Phase 4: Pet Hotel & Grooming](#7-phase-4-pet-hotel--grooming)
+8. [Phase 5: Petshop & Inventory](#8-phase-5-petshop--inventory)
+9. [Phase 6: POS & Billing](#9-phase-6-pos--billing)
+10. [Phase 7: Loyalty & Promotions](#10-phase-7-loyalty--promotions)
+11. [Phase 8: Finance & Reports](#11-phase-8-finance--reports)
+12. [Phase 9: Customer Portal](#12-phase-9-customer-portal)
+13. [Phase 10: Integration & Testing](#13-phase-10-integration--testing)
+14. [Phase 11: Deployment & Launch](#14-phase-11-deployment--launch)
+15. [Matrik Definition of Done Global](#15-matrik-definition-of-done-global)
+16. [Dependency Matrix](#16-dependency-matrix)
 
 ---
 
 ## 1. Overview Roadmap
+
+### 1.1 Tujuan Dokumen
+Dokumen ini memetakan urutan implementasi pengembangan dari fondasi sampai produk siap launch. Fokusnya bukan sekadar daftar fitur, tetapi alur kerja yang menjamin masing-masing fase dibangun sesuai contract baseline dari dokumen master.
+
+### 1.2 Hubungan Workflow dan Contract Baseline
+
+| Elemen | Fungsi | Sumber Kebenaran |
+|---|---|---|
+| Roadmap | Urutan implementasi dan kontrol progres | Dokumen master + keputusan product |
+| Arsitektur | Struktur teknis dan platform | `master-arsitektur.md` |
+| Frontend | UI/UX, komponen, experience | `master-spesifikasi-frontend.md` |
+| Modul | Workflow bisnis, aturan fitur | `master-spesifikasii-modul.md` |
+| Testing & CI/CD | Quality gate dan deployment | `master-test-cidi.md` |
+
+### 1.3 Prinsip Delivery
+| Prinsip | Penjelasan |
+|---|---|
+| **Foundation First** | Setup infrastruktur & DB schema sebelum fitur |
+| **Auth Early** | Auth & RBAC di awal karena semua modul bergantung |
+| **Core Before Advanced** | CRM → Appointments → Petshop → POS |
+| **Integration Last** | Integrasi & testing setelah semua modul siap |
+| **Incremental Delivery** | Setiap phase deliverable & testable |
+| **Contract Compliance** | Semua implementasi harus sesuai baseline spesifikasi master |
+| **No Time Estimates** | Fokus pada quality, bukan speed |
+
+---
+
+## 2. Contract Baseline Governance
+
+### 2.1 Aturan Baseline
+- Dilarang mengimplementasikan fungsi baru di luar kontrak baseline tanpa update dokumen master.
+- Setiap modul wajib mencerminkan spesifikasi yang tertulis di dokumen master terkait.
+- Uji kualitas harus mengikuti checklist dari `master-test-cidi.md` sebelum masuk ke fase berikutnya.
+- Perubahan pada arsitektur, modul, atau UI harus di-review untuk dampaknya terhadap roadmap dan implementasi aktif.
+
+### 2.2 Gate Per Fase
+Setiap fase implementasi hanya dapat dianggap selesai bila:
+- fitur yang dibangun sesuai kontrak modul yang berlaku;
+- arsitektur dan frontend mengikuti pattern baseline;
+- testing dan quality gates lulus sesuai master testing;
+- hasil deliverable telah diverifikasi secara teknis dan fungsional.
+
+### 2.3 Change Control
+Jika ada kebutuhan perubahan, maka prosesnya:
+1. Update dokumen master yang relevan.
+2. Evaluasi dampaknya terhadap roadmap dan fase berikutnya.
+3. Revisi prioritas implementasi bila diperlukan.
+4. Lakukan verifikasi ulang sebelum melanjutkan fase baru.
+
+---
+
+## 3. Phase 0: Foundation & Setup
 
 ### 1.1 Struktur Fase
 
