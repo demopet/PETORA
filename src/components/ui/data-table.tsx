@@ -54,7 +54,7 @@ export function DataTable<TData>({
                     <td key={column.accessorKey} className="px-4 py-3">
                       {column.cell
                         ? column.cell({ original: row })
-                        : (row as unknown)?.[column.accessorKey]}
+                        : (row as Record<string, unknown>)[column.accessorKey]}
                     </td>
                   ))}
                 </tr>
