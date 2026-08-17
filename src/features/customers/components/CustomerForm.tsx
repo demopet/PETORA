@@ -7,8 +7,8 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface CustomerFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     name: string
     phone?: string
     email?: string

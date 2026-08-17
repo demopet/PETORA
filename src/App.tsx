@@ -1,5 +1,7 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import Layout from '@/components/layout/Layout'
+import { ProtectedRoute } from '@/components/ProtectedRoute'
+import { PortalRoute } from '@/components/PortalRoute'
 import LoginPage from '@/features/auth/pages/LoginPage'
 import DashboardPage from '@/features/dashboard/pages/DashboardPage'
 
@@ -25,29 +27,32 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/" element={<Layout />}>
+
+      <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardPage />} />
         <Route path="customers" element={<CustomersPage />} />
         <Route path="pets" element={<PetsPage />} />
         <Route path="appointments" element={<AppointmentsPage />} />
-        <Route path="medical-records" element={<MedicalRecordsPage />} />
+        <Route path="medical-records" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN', 'DOKTER']}><MedicalRecordsPage /></ProtectedRoute>} />
         <Route path="pet-hotel" element={<PetHotelPage />} />
         <Route path="grooming" element={<GroomingPage />} />
         <Route path="products" element={<ProductsPage />} />
-        <Route path="inventory" element={<InventoryPage />} />
-        <Route path="purchase-orders" element={<PurchaseOrdersPage />} />
+        <Route path="inventory" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><InventoryPage /></ProtectedRoute>} />
+        <Route path="purchase-orders" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><PurchaseOrdersPage /></ProtectedRoute>} />
         <Route path="pos" element={<POSPage />} />
         <Route path="invoices" element={<InvoicesPage />} />
         <Route path="cash-shifts" element={<CashShiftsPage />} />
-        <Route path="loyalty" element={<LoyaltyPage />} />
-        <Route path="promotions" element={<PromotionsPage />} />
-        <Route path="expenses" element={<ExpensesPage />} />
-        <Route path="reports" element={<ReportsPage />} />
-        <Route path="settings" element={<SettingsPage />} />
-        <Route path="settings/*" element={<SettingsPage />} />
+        <Route path="loyalty" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><LoyaltyPage /></ProtectedRoute>} />
+        <Route path="promotions" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><PromotionsPage /></ProtectedRoute>} />
+        <Route path="expenses" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><ExpensesPage /></ProtectedRoute>} />
+        <Route path="reports" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><ReportsPage /></ProtectedRoute>} />
+        <Route path="settings" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><SettingsPage /></ProtectedRoute>} />
+        <Route path="settings/*" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><SettingsPage /></ProtectedRoute>} />
       </Route>
-      <Route path="/portal/*" element={<div>Customer Portal</div>} />
+
+      <Route path="/portal/*" element={<PortalRoute><div>Customer Portal</div></PortalRoute>} />
+
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>
   )

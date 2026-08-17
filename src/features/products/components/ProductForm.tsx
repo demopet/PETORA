@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface ProductFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     sku: string
     name: string
     category_id?: string

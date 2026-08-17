@@ -1,39 +1,28 @@
-import { Outlet, Navigate } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
+import { Outlet } from 'react-router-dom'
+import { useAuth } from '@/features/auth/context/AuthContext'
 import Sidebar from '@/components/layout/Sidebar'
 import TopBar from '@/components/layout/TopBar'
-import type { UserRole } from '@/types/user'
 
 export default function Layout() {
-  const { data: session, isLoading } = useQuery({
-    queryKey: ['session'],
-    queryFn: async () => {
-      const { data } = await supabase.auth.getSession()
-      return data.session
-    },
-  })
+  const { user, isLoading } = useAuth()
 
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-slate-50">
-        <div className="text-slate-600">Loading...</div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
       </div>
     )
   }
 
-  if (!session) {
-    return <Navigate to="/login" replace />
+  if (!user) {
+    return null // ProtectedRoute handles redirect
   }
-
-  const userRole = session.user.user_metadata.role as UserRole
-  const userName = session.user.user_metadata.full_name as string
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar userRole={userRole} />
+      <Sidebar userRole={user.role} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar userName={userName} userRole={userRole} />
+        <TopBar userName={user.full_name} userRole={user.role} />
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

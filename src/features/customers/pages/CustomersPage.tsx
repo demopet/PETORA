@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useMutation } from '@tanstack/react-query'
 import { Plus, Search, Trash2, Edit, UserPlus } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { StatusBadge } from '@/components/ui/status-badge'
@@ -142,7 +141,16 @@ export default function CustomersPage() {
             // create mutation
           }
         }}
-        initialData={editingCustomer || undefined}
+        initialData={editingCustomer ? {
+          name: editingCustomer.name,
+          phone: editingCustomer.phone ?? undefined,
+          email: editingCustomer.email ?? undefined,
+          address: editingCustomer.address ?? undefined,
+          emergency_contact: editingCustomer.emergency_contact ?? undefined,
+          notes: editingCustomer.notes ?? undefined,
+          is_guest: editingCustomer.is_guest,
+          tags: editingCustomer.tags,
+        } : undefined}
       />
     </div>
   )

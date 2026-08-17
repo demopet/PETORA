@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils'
 
 interface SelectProps {
   value?: string
-  onValueChange: (value: string) => void
+  onValueChange: (_value: string) => void
   placeholder?: string
   children: React.ReactNode
   className?: string

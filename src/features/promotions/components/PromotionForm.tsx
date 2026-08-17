@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface PromotionFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     code?: string
     name: string
     description?: string

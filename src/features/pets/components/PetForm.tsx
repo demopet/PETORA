@@ -8,8 +8,8 @@ import type { Pet } from '@/types/pet'
 
 interface PetFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     customer_id: string
     name: string
     species: string

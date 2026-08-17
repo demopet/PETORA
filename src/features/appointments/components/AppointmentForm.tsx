@@ -8,8 +8,8 @@ import { Textarea } from '@/components/ui/textarea'
 
 interface AppointmentFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     customer_id: string
     pet_id: string
     doctor_id?: string
@@ -92,7 +92,7 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, customers, pets,
               value={formData.pet_id}
               onValueChange={(value) => setFormData({ ...formData, pet_id: value })}
               placeholder="Select pet"
-              disabled={!formData.customer_id}
+              
             >
               {filteredPets.map((pet) => (
                 <SelectOption key={pet.id} value={pet.id}>

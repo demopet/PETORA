@@ -5,11 +5,12 @@ import { Input } from '@/components/ui/input'
 import { FormField } from '@/components/ui/form-field'
 import { Select, SelectOption } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
+import { Label } from '@/components/ui/label'
 
 interface ExpenseFormProps {
   open: boolean
-  onOpenChange: (open: boolean) => void
-  onSubmit: (data: {
+  onOpenChange: (_open: boolean) => void
+  onSubmit: (_data: {
     category_id: string
     amount: number
     expense_date: string
@@ -30,12 +31,21 @@ interface ExpenseFormProps {
     recurring_day?: number
   }
 }
-
 export function ExpenseForm({ open, onOpenChange, onSubmit, categories, initialData }: ExpenseFormProps) {
-  const [formData, setFormData] = React.useState({
+
+  const defaultExpenseDate = React.useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const [formData, setFormData] = React.useState<{
+    category_id: string
+    amount: string
+    expense_date: string
+    description: string
+    receipt_url: string
+    is_recurring: boolean
+    recurring_day: string
+  }>({
     category_id: initialData?.category_id || '',
     amount: initialData?.amount?.toString() || '',
-    expense_date: initialData?.expense_date || new Date().toISOString().split('T')[0],
+    expense_date: initialData?.expense_date ?? defaultExpenseDate,
     description: initialData?.description || '',
     receipt_url: initialData?.receipt_url || '',
     is_recurring: initialData?.is_recurring || false,
@@ -47,19 +57,20 @@ export function ExpenseForm({ open, onOpenChange, onSubmit, categories, initialD
       setFormData({
         category_id: initialData.category_id || '',
         amount: initialData.amount?.toString() || '',
-        expense_date: initialData.expense_date || new Date().toISOString().split('T')[0],
+        expense_date: initialData.expense_date ?? defaultExpenseDate,
         description: initialData.description || '',
         receipt_url: initialData.receipt_url || '',
         is_recurring: initialData.is_recurring || false,
         recurring_day: initialData.recurring_day?.toString() || '',
       })
     }
-  }, [initialData])
+  }, [initialData, defaultExpenseDate])
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSubmit({
       ...formData,
+      expense_date: formData.expense_date || new Date().toISOString().slice(0, 10),
       amount: parseFloat(formData.amount) || 0,
       recurring_day: formData.is_recurring ? parseInt(formData.recurring_day) || undefined : undefined,
     })
