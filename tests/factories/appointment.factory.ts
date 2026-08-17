@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { Appointment } from '@/types/appointment';
 
-export function createAppointmentFactory(overrides: Record<string, any> = {}) {
+export function createAppointmentFactory(overrides: Partial<Appointment> = {}): Appointment {
   return {
     id: overrides.id || faker.string.uuid(),
     customer_id: overrides.customer_id || faker.string.uuid(),

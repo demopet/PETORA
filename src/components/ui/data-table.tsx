@@ -1,5 +1,5 @@
+import * as React from 'react'
 import { cn } from '@/lib/utils'
-import { Button } from '@/components/ui/button'
 
 interface DataTableProps<TData> {
   columns: Array<{
@@ -54,7 +54,7 @@ export function DataTable<TData>({
                     <td key={column.accessorKey} className="px-4 py-3">
                       {column.cell
                         ? column.cell({ original: row })
-                        : (row as any)?.[column.accessorKey]}
+                        : (row as unknown)?.[column.accessorKey]}
                     </td>
                   ))}
                 </tr>

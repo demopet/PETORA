@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { Pet } from '@/types/pet';
 
-export function createPetFactory(overrides: Record<string, any> = {}) {
+export function createPetFactory(overrides: Partial<Pet> = {}): Pet {
   const species = overrides.species || faker.helpers.arrayElement(['Dog', 'Cat', 'Rabbit']);
 
   return {

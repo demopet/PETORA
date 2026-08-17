@@ -1,21 +1,36 @@
-import { Bell, Search, User } from 'lucide-react'
+import { Bell, LogOut, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { UserRole } from '@/types/user'
 
-export default function TopBar() {
+interface TopBarProps {
+  userName: string
+  userRole: UserRole
+}
+
+export default function TopBar({ userName, userRole }: TopBarProps) {
   return (
     <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon">
-          <Search className="h-5 w-5" />
-        </Button>
+        <h2 className="text-lg font-semibold text-slate-900">Petora</h2>
       </div>
+
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon">
-          <Bell className="h-5 w-5" />
+          <Bell className="h-5 w-5 text-slate-500" />
         </Button>
-        <Button variant="ghost" size="icon">
-          <User className="h-5 w-5" />
-        </Button>
+
+        <div className="flex items-center gap-3">
+          <div className="text-right">
+            <div className="text-sm font-medium text-slate-900">{userName}</div>
+            <div className="text-xs text-slate-500">{userRole}</div>
+          </div>
+          <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-primary-600">
+            <User className="h-4 w-4" />
+          </div>
+          <Button variant="ghost" size="icon">
+            <LogOut className="h-5 w-5 text-slate-500" />
+          </Button>
+        </div>
       </div>
     </header>
   )

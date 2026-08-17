@@ -21,8 +21,8 @@ export default function InvoicesPage() {
     {
       header: 'Invoice #',
       accessorKey: 'invoice_number' as const,
-      cell: ({ row }: { row: { original: Invoice } }) => (
-        <div className="font-medium text-slate-900">{row.original.invoice_number}</div>
+      cell: ({ original }: { original: Invoice }) => (
+        <div className="font-medium text-slate-900">{original.invoice_number}</div>
       ),
     },
     {
@@ -32,29 +32,29 @@ export default function InvoicesPage() {
     {
       header: 'Total',
       accessorKey: 'total_amount' as const,
-      cell: ({ row }: { row: { original: Invoice } }) => (
+      cell: ({ original }: { original: Invoice }) => (
         <div className="font-medium">
           {new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
-          }).format(row.original.total_amount)}
+          }).format(original.total_amount)}
         </div>
       ),
     },
     {
       header: 'Status',
       accessorKey: 'status' as const,
-      cell: ({ row }: { row: { original: Invoice } }) => (
-        <StatusBadge status={row.original.status} />
+      cell: ({ original }: { original: Invoice }) => (
+        <StatusBadge status={original.status} />
       ),
     },
     {
       header: 'Date',
       accessorKey: 'created_at' as const,
-      cell: ({ row }: { row: { original: Invoice } }) => (
+      cell: ({ original }: { original: Invoice }) => (
         <div className="text-sm text-slate-500">
-          {new Date(row.original.created_at).toLocaleDateString('id-ID')}
+          {new Date(original.created_at).toLocaleDateString('id-ID')}
         </div>
       ),
     },

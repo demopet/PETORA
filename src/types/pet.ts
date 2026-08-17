@@ -23,7 +23,7 @@ export interface CreatePetInput {
   microchip_number?: string;
 }
 
-export interface UpdatePetInput extends Partial<CreatePetInput> {}
+export type UpdatePetInput = Partial<CreatePetInput>;
 
 export interface PetWeightLog extends BaseEntity {
   pet_id: UUID;

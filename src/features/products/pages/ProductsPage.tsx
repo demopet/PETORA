@@ -29,62 +29,62 @@ export default function ProductsPage() {
     {
       header: 'Name',
       accessorKey: 'name' as const,
-      cell: ({ row }: { row: { original: Product } }) => (
+      cell: ({ original }: { original: Product }) => (
         <div>
-          <div className="font-medium text-slate-900">{row.original.name}</div>
-          <div className="text-sm text-slate-500">SKU: {row.original.sku}</div>
+          <div className="font-medium text-slate-900">{original.name}</div>
+          <div className="text-sm text-slate-500">SKU: {original.sku}</div>
         </div>
       ),
     },
     {
       header: 'Category',
       accessorKey: 'category_id' as const,
-      cell: ({ row }: { row: { original: Product } }) => row.original.category_id || '-',
+      cell: ({ original }: { original: Product }) => original.category_id || '-',
     },
     {
       header: 'Price',
       accessorKey: 'selling_price' as const,
-      cell: ({ row }: { row: { original: Product } }) => (
+      cell: ({ original }: { original: Product }) => (
         <div className="font-medium">
           {new Intl.NumberFormat('id-ID', {
             style: 'currency',
             currency: 'IDR',
             minimumFractionDigits: 0,
-          }).format(row.original.selling_price)}
+          }).format(original.selling_price)}
         </div>
       ),
     },
     {
       header: 'Stock',
       accessorKey: 'stock_quantity' as const,
-      cell: ({ row }: { row: { original: Product } }) => (
+      cell: ({ original }: { original: Product }) => (
         <div
           className={
-            row.original.stock_quantity <= row.original.stock_minimum
+            original.stock_quantity <= original.stock_minimum
               ? 'text-danger-600 font-medium'
               : ''
           }
         >
-          {row.original.stock_quantity}
+          {original.stock_quantity}
         </div>
       ),
     },
     {
       header: 'Status',
       accessorKey: 'status' as const,
-      cell: ({ row }: { row: { original: Product } }) => (
-        <StatusBadge status={row.original.status} />
+      cell: ({ original }: { original: Product }) => (
+        <StatusBadge status={original.status} />
       ),
     },
     {
       header: 'Actions',
       accessorKey: 'id' as const,
-      cell: ({ row }: { row: { original: Product } }) => (
+      cell: ({ original }: { original: Product }) => (
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleArchive(row.original.id)}
+            onClick={() => handleArchive(original.id)}
           >
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>

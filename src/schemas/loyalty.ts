@@ -6,7 +6,7 @@ export const createLoyaltyTierSchema = z.object({
   min_points: z.number().int().nonnegative(),
   min_spending: z.number().nonnegative(),
   point_multiplier: z.number().positive(),
-  benefits: z.record(z.string(), z.any()),
+  benefits: z.record(z.string(), z.unknown()),
 });
 
 export const redeemPointsSchema = z.object({

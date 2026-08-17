@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { useCreateAppointment } from '../hooks/use-appointments'
 import { Plus, Search } from 'lucide-react'
 import { DataTable } from '@/components/ui/data-table'
 import { StatusBadge } from '@/components/ui/status-badge'
@@ -30,21 +29,21 @@ export default function AppointmentsPage() {
     {
       header: 'Customer',
       accessorKey: 'customer_id' as const,
-      cell: ({ row }: { row: { original: Appointment } }) => (
-        <div className="font-medium text-slate-900">{row.original.customer_id}</div>
+      cell: ({ original }: { original: Appointment }) => (
+        <div className="font-medium text-slate-900">{original.customer_id}</div>
       ),
     },
     {
       header: 'Status',
       accessorKey: 'status' as const,
-      cell: ({ row }: { row: { original: Appointment } }) => (
-        <StatusBadge status={row.original.status} />
+      cell: ({ original }: { original: Appointment }) => (
+        <StatusBadge status={original.status} />
       ),
     },
     {
       header: 'Queue',
       accessorKey: 'queue_number' as const,
-      cell: ({ row }: { row: { original: Appointment } }) => row.original.queue_number || '-',
+      cell: ({ original }: { original: Appointment }) => original.queue_number || '-',
     },
   ]
 

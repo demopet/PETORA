@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { Invoice } from '@/types/invoice';
 
-export function createInvoiceFactory(overrides: Record<string, any> = {}) {
+export function createInvoiceFactory(overrides: Partial<Invoice> = {}): Invoice {
   const subtotal = overrides.subtotal || faker.number.int({ min: 50000, max: 2000000 });
   const discount = overrides.discount_amount || 0;
   const tax = overrides.tax_amount || 0;

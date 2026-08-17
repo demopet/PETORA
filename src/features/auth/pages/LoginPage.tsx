@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { login } from '../services/auth.service'
 import { Button } from '@/components/ui/button'
@@ -19,7 +19,7 @@ export default function LoginPage() {
     },
   })
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setError('')
     loginMutation.mutate()

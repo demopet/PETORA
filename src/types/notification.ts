@@ -6,5 +6,5 @@ export interface Notification extends BaseEntity {
   message: string;
   type: string;
   is_read: boolean;
-  data: Record<string, any> | null;
+  data: Record<string, unknown> | null;
 }

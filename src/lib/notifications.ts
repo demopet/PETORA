@@ -5,7 +5,7 @@ export async function sendNotification(params: {
   title: string;
   message: string;
   type: 'INFO' | 'WARNING' | 'ALERT' | 'REMINDER';
-  data?: Record<string, any>;
+  data?: Record<string, unknown>;
 }) {
   await supabase.from('notifications').insert({
     ...params,

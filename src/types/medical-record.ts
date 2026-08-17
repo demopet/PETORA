@@ -39,4 +39,4 @@ export interface CreateMedicalRecordInput {
   attachments?: string[];
 }
 
-export interface UpdateMedicalRecordInput extends Partial<CreateMedicalRecordInput> {}
+export type UpdateMedicalRecordInput = Partial<CreateMedicalRecordInput>;

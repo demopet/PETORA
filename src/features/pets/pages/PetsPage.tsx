@@ -32,8 +32,8 @@ export default function PetsPage({ customerId }: PetsPageProps) {
     {
       header: 'Name',
       accessorKey: 'name' as const,
-      cell: ({ row }: { row: { original: Pet } }) => (
-        <div className="font-medium text-slate-900">{row.original.name}</div>
+      cell: ({ original }: { original: Pet }) => (
+        <div className="font-medium text-slate-900">{original.name}</div>
       ),
     },
     {
@@ -43,22 +43,22 @@ export default function PetsPage({ customerId }: PetsPageProps) {
     {
       header: 'Breed',
       accessorKey: 'breed' as const,
-      cell: ({ row }: { row: { original: Pet } }) => row.original.breed || '-',
+      cell: ({ original }: { original: Pet }) => original.breed || '-',
     },
     {
       header: 'Gender',
       accessorKey: 'gender' as const,
-      cell: ({ row }: { row: { original: Pet } }) => row.original.gender || '-',
+      cell: ({ original }: { original: Pet }) => original.gender || '-',
     },
     {
       header: 'Actions',
       accessorKey: 'id' as const,
-      cell: ({ row }: { row: { original: Pet } }) => (
+      cell: ({ original }: { original: Pet }) => (
         <div className="flex items-center gap-2">
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleDelete(row.original.id)}
+            onClick={() => handleDelete(original.id)}
           >
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>

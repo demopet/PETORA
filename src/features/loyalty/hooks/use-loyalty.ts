@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase/client'
-import type { LoyaltyMember, LoyaltyTransaction } from '@/types/loyalty'
+import type { LoyaltyMember, LoyaltyTransaction, LoyaltyTierConfig } from '@/types/loyalty'
 
 export function useLoyaltyMembers() {
   return useQuery({
@@ -12,7 +12,7 @@ export function useLoyaltyMembers() {
         .order('total_points', { ascending: false })
 
       if (error) throw error
-      return data as (LoyaltyMember & { loyalty_tiers: any })[]
+      return data as (LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig })[]
     },
   })
 }
@@ -28,7 +28,7 @@ export function useLoyaltyMember(customerId: string) {
         .single()
 
       if (error) throw error
-      return data as LoyaltyMember & { loyalty_tiers: any }
+      return data as LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig }
     },
     enabled: !!customerId,
   })

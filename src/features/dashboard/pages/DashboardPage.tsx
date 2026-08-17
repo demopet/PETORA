@@ -4,6 +4,8 @@ import { StatCard } from '@/components/ui/stat-card'
 import { DataTable } from '@/components/ui/data-table'
 import { StatusBadge } from '@/components/ui/status-badge'
 import { Users, PawPrint, Calendar, DollarSign } from 'lucide-react'
+import type { Appointment } from '@/types/appointment'
+import type { Invoice } from '@/types/invoice'
 
 export default function DashboardPage() {
   const { data: customers } = useQuery({
@@ -60,8 +62,8 @@ export default function DashboardPage() {
     {
       header: 'Customer',
       accessorKey: 'customer_id' as const,
-      cell: ({ row }: { row: { original: any } }) => (
-        <div className="font-medium text-slate-900">{row.original.customer_id}</div>
+      cell: ({ original }: { original: Appointment }) => (
+        <div className="font-medium text-slate-900">{original.customer_id}</div>
       ),
     },
     {
@@ -71,13 +73,13 @@ export default function DashboardPage() {
     {
       header: 'Status',
       accessorKey: 'status' as const,
-      cell: ({ row }: { row: { original: any } }) => (
-        <StatusBadge status={row.original.status} />
+      cell: ({ original }: { original: Appointment }) => (
+        <StatusBadge status={original.status} />
       ),
     },
   ]
 
-  const totalRevenue = invoices?.reduce((sum: number, inv: any) => sum + inv.total_amount, 0) || 0
+  const totalRevenue = invoices?.reduce((sum: number, inv: Invoice) => sum + inv.total_amount, 0) || 0
 
   return (
     <div className="space-y-6">

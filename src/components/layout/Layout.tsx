@@ -27,9 +27,9 @@ export default function Layout() {
 
   return (
     <div className="flex h-screen bg-slate-50">
-      <Sidebar />
+      <Sidebar userRole={session.user.user_metadata.role as any} />
       <div className="flex flex-1 flex-col overflow-hidden">
-        <TopBar />
+        <TopBar userName={session.user.user_metadata.full_name} userRole={session.user.user_metadata.role as any} />
         <main className="flex-1 overflow-y-auto p-6">
           <Outlet />
         </main>

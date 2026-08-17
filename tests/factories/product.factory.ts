@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { Product } from '@/types/product';
 
-export function createProductFactory(overrides: Record<string, any> = {}) {
+export function createProductFactory(overrides: Partial<Product> = {}): Product {
   const purchasePrice = overrides.purchase_price || faker.number.int({ min: 10000, max: 500000 });
 
   return {

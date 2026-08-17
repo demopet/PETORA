@@ -1,12 +1,13 @@
 import { faker } from '@faker-js/faker';
+import type { Customer } from '@/types/customer';
 
-export function createCustomerFactory(overrides: Record<string, any> = {}) {
+export function createCustomerFactory(overrides: Partial<Customer> = {}): Customer {
   return {
     id: overrides.id || faker.string.uuid(),
     name: overrides.name || faker.person.fullName(),
-    phone: overrides.phone || faker.phone.number('+62 8## #### ####'),
+    phone: overrides.phone || faker.phone.number(),
     email: overrides.email || faker.internet.email(),
-    address: overrides.address || faker.location.streetAddress(),
+    address: overrides.address || null,
     emergency_contact: overrides.emergency_contact || null,
     photo_url: overrides.photo_url || null,
     notes: overrides.notes || null,

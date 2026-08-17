@@ -5,8 +5,8 @@ export interface AuditLog extends BaseEntity {
   action: string;
   entity_type: string;
   entity_id: UUID | null;
-  old_values: Record<string, any> | null;
-  new_values: Record<string, any> | null;
+  old_values: Record<string, unknown> | null;
+  new_values: Record<string, unknown> | null;
   ip_address: string | null;
   user_agent: string | null;
 }

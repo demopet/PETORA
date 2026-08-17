@@ -48,13 +48,13 @@ export async function seedTestData() {
     .select()
     .single();
 
-  const doctor = await supabase
+  void await supabase
     .from('users')
     .insert(createUserFactory({ role: 'DOKTER', username: 'test.doctor', created_by: owner.data.id }))
     .select()
     .single();
 
-  const kasir = await supabase
+  void await supabase
     .from('users')
     .insert(createUserFactory({ role: 'KASIR', username: 'test.kasir', created_by: owner.data.id }))
     .select()

@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { User } from '@/types/user';
 
-export function createUserFactory(overrides: Record<string, any> = {}) {
+export function createUserFactory(overrides: Partial<User> = {}): User {
   return {
     id: overrides.id || faker.string.uuid(),
     username: overrides.username || faker.internet.userName(),

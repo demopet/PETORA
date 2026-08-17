@@ -1,6 +1,7 @@
 import { faker } from '@faker-js/faker';
+import type { Room } from '@/types/pet-hotel';
 
-export function createRoomFactory(overrides: Record<string, any> = {}) {
+export function createRoomFactory(overrides: Partial<Room> = {}): Room {
   return {
     id: overrides.id || faker.string.uuid(),
     name: overrides.name || `Room ${faker.string.numeric(3)}`,

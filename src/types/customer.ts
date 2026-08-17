@@ -30,4 +30,4 @@ export interface CreateCustomerInput {
   pin?: string;
 }
 
-export interface UpdateCustomerInput extends Partial<CreateCustomerInput> {}
+export type UpdateCustomerInput = Partial<CreateCustomerInput>;

@@ -8,7 +8,7 @@ export interface LoyaltyTierConfig extends BaseEntity {
   min_points: number;
   min_spending: number;
   point_multiplier: number;
-  benefits: Record<string, any>;
+  benefits: Record<string, unknown>;
 }
 
 export interface LoyaltyMember extends BaseEntity {

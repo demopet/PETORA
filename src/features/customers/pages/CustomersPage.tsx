@@ -29,29 +29,29 @@ export default function CustomersPage() {
     {
       header: 'Name',
       accessorKey: 'name' as const,
-      cell: ({ row }: { row: { original: Customer } }) => (
+      cell: ({ original }: { original: Customer }) => (
         <div>
-          <div className="font-medium text-slate-900">{row.original.name}</div>
-          <div className="text-sm text-slate-500">{row.original.phone}</div>
+          <div className="font-medium text-slate-900">{original.name}</div>
+          <div className="text-sm text-slate-500">{original.phone}</div>
         </div>
       ),
     },
     {
       header: 'Email',
       accessorKey: 'email' as const,
-      cell: ({ row }: { row: { original: Customer } }) => row.original.email || '-',
+      cell: ({ original }: { original: Customer }) => original.email || '-',
     },
     {
       header: 'Status',
       accessorKey: 'is_active' as const,
-      cell: ({ row }: { row: { original: Customer } }) => (
-        <StatusBadge status={row.original.is_active ? 'ACTIVE' : 'ARCHIVED'} />
+      cell: ({ original }: { original: Customer }) => (
+        <StatusBadge status={original.is_active ? 'ACTIVE' : 'ARCHIVED'} />
       ),
     },
     {
       header: 'Actions',
       accessorKey: 'id' as const,
-      cell: ({ row }: { row: { original: Customer } }) => (
+      cell: ({ original }: { original: Customer }) => (
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon">
             <Edit className="h-4 w-4" />
@@ -59,7 +59,7 @@ export default function CustomersPage() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => handleDelete(row.original.id)}
+            onClick={() => handleDelete(original.id)}
           >
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>

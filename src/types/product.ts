@@ -54,7 +54,7 @@ export interface CreateProductInput {
   expiry_date?: string;
 }
 
-export interface UpdateProductInput extends Partial<CreateProductInput> {}
+export type UpdateProductInput = Partial<CreateProductInput>;
 
 export interface ProductVariant extends BaseEntity {
   product_id: UUID;
