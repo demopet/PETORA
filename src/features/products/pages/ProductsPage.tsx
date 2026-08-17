@@ -1,0 +1,152 @@
+import { useState } from 'react'
+import { useArchiveProduct } from '../hooks/use-products'
+import { Plus, Search, Trash2 } from 'lucide-react'
+import { DataTable } from '@/components/ui/data-table'
+import { StatusBadge } from '@/components/ui/status-badge'
+import { EmptyState } from '@/components/ui/empty-state'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { useProducts } from '../hooks/use-products'
+import type { Product } from '@/types/product'
+
+export default function ProductsPage() {
+  const [search, setSearch] = useState('')
+  const { data: products, isLoading, error } = useProducts()
+  const archiveMutation = useArchiveProduct()
+
+  const filteredProducts = products?.filter((product) =>
+    product.name.toLowerCase().includes(search.toLowerCase()) ||
+    product.sku.toLowerCase().includes(search.toLowerCase())
+  )
+
+  const handleArchive = async (id: string) => {
+    if (confirm('Are you sure you want to archive this product?')) {
+      await archiveMutation.mutateAsync(id)
+    }
+  }
+
+  const columns = [
+    {
+      header: 'Name',
+      accessorKey: 'name' as const,
+      cell: ({ row }: { row: { original: Product } }) => (
+        <div>
+          <div className="font-medium text-slate-900">{row.original.name}</div>
+          <div className="text-sm text-slate-500">SKU: {row.original.sku}</div>
+        </div>
+      ),
+    },
+    {
+      header: 'Category',
+      accessorKey: 'category_id' as const,
+      cell: ({ row }: { row: { original: Product } }) => row.original.category_id || '-',
+    },
+    {
+      header: 'Price',
+      accessorKey: 'selling_price' as const,
+      cell: ({ row }: { row: { original: Product } }) => (
+        <div className="font-medium">
+          {new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+          }).format(row.original.selling_price)}
+        </div>
+      ),
+    },
+    {
+      header: 'Stock',
+      accessorKey: 'stock_quantity' as const,
+      cell: ({ row }: { row: { original: Product } }) => (
+        <div
+          className={
+            row.original.stock_quantity <= row.original.stock_minimum
+              ? 'text-danger-600 font-medium'
+              : ''
+          }
+        >
+          {row.original.stock_quantity}
+        </div>
+      ),
+    },
+    {
+      header: 'Status',
+      accessorKey: 'status' as const,
+      cell: ({ row }: { row: { original: Product } }) => (
+        <StatusBadge status={row.original.status} />
+      ),
+    },
+    {
+      header: 'Actions',
+      accessorKey: 'id' as const,
+      cell: ({ row }: { row: { original: Product } }) => (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleArchive(row.original.id)}
+          >
+            <Trash2 className="h-4 w-4 text-danger-500" />
+          </Button>
+        </div>
+      ),
+    },
+  ]
+
+  if (isLoading) {
+    return <div className="text-slate-500">Loading products...</div>
+  }
+
+  if (error) {
+    return <div className="text-danger-500">Error loading products</div>
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">Products</h1>
+          <p className="mt-1 text-sm text-slate-500">
+            {filteredProducts?.length || 0} products
+          </p>
+        </div>
+        <Button>
+          <Plus className="h-4 w-4" />
+          Add Product
+        </Button>
+      </div>
+
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+          <Input
+            type="text"
+            placeholder="Search products..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={filteredProducts || []}
+        searchKey="name"
+        emptyState={
+          <EmptyState
+            icon={<Plus className="h-12 w-12" />}
+            title="No products found"
+            description="Get started by adding your first product."
+            action={
+              <Button>
+                <Plus className="h-4 w-4" />
+                Add Product
+              </Button>
+            }
+          />
+        }
+      />
+    </div>
+  )
+}

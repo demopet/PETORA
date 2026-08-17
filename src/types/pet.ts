@@ -1,3 +1,5 @@
+import type { SoftDeletable, UUID, BaseEntity } from './base';
+
 export interface Pet extends SoftDeletable {
   customer_id: UUID;
   name: string;

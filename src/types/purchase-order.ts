@@ -1,3 +1,5 @@
+import type { BaseEntity, UUID } from './base';
+
 export type PurchaseOrderStatus = 'DRAFT' | 'SENT' | 'PARTIAL_RECEIVED' | 'RECEIVED' | 'CANCELLED';
 
 export interface PurchaseOrder extends BaseEntity {

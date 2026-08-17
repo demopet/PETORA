@@ -1,4 +1,4 @@
-import { UserRole } from '$types/user';
+import { UserRole } from '@/types/user';
 
 export const hasPermission = (userRole: UserRole, requiredRoles: UserRole[]): boolean => {
   return requiredRoles.includes(userRole);

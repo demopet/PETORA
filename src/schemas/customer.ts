@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { uuidSchema } from './base';
 
 export const customerTagSchema = z.enum(['VIP', 'REGULAR', 'NEW', 'BLACKLIST']);
 

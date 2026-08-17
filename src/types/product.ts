@@ -1,3 +1,5 @@
+import type { SoftDeletable, BaseEntity, UUID } from './base';
+
 export type ProductStatus = 'ACTIVE' | 'ARCHIVED';
 export type StockMovementType = 'IN' | 'OUT' | 'RETURN' | 'ADJUSTMENT' | 'DAMAGED' | 'EXPIRED' | 'OPNAME';
 

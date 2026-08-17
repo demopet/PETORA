@@ -1,3 +1,5 @@
+import type { BaseEntity, UUID } from './base';
+
 export interface Notification extends BaseEntity {
   user_id: UUID | null;
   title: string;

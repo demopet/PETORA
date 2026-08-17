@@ -1,3 +1,5 @@
+import type { BaseEntity, UUID, Timestamp } from './base';
+
 export type InvoiceType = 'POS' | 'CLINICAL' | 'PET_HOTEL' | 'GROOMING' | 'MIXED';
 export type InvoiceStatus = 'UNPAID' | 'PARTIAL_PAYMENT' | 'PAID' | 'CANCELLED';
 export type PaymentMethod = 'CASH' | 'QRIS' | 'TRANSFER' | 'E_WALLET' | 'CREDIT_CARD' | 'MIXED';

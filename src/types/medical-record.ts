@@ -1,3 +1,5 @@
+import type { SoftDeletable, UUID } from './base';
+
 export type MedicalRecordStatus = 'OPEN' | 'CLOSED';
 
 export interface MedicalRecord extends SoftDeletable {
