@@ -1,9 +1,11 @@
 import { lazy, Suspense } from "react";
-import { Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PortalRoute from "@/components/PortalRoute";
 import LoginPage from "@/features/auth/pages/LoginPage";
+import { useGlobalKeyboardShortcuts } from "@/hooks/use-app-shortcuts";
+import { useNavigationShortcuts } from "@/hooks/use-route-shortcuts";
 
 const DashboardPage = lazy(() => import("@/features/dashboard/pages/DashboardPage"));
 const CustomersPage = lazy(() => import("@/features/customers/pages/CustomersPage"));
@@ -47,6 +49,10 @@ function RouteSkeleton() {
 }
 
 function App() {
+  useLocation();
+  useGlobalKeyboardShortcuts();
+  useNavigationShortcuts();
+
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />

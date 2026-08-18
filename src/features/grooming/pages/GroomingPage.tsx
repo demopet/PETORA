@@ -6,15 +6,23 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  useGroomingBookings,
-  useGroomingServices,
-} from "../hooks/use-grooming";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
+import { FormField } from "@/components/ui/form-field";
+import { Textarea } from "@/components/ui/textarea";
+import { useGroomingBookings, useGroomingServices } from "../hooks/use-grooming";
 import {
   useStartGrooming,
   useFinishGrooming,
   useCancelGroomingBooking,
 } from "../hooks/use-grooming";
 import type { GroomingBooking, GroomingService } from "@/types/grooming";
+import { toast } from "sonner";
 
 type GroomingStatus = "BOOKED" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 
@@ -23,6 +31,15 @@ const STATUS_STEPS: GroomingStatus[] = ["BOOKED", "IN_PROGRESS", "DONE"];
 export default function GroomingPage() {
   const [search, setSearch] = useState("");
   const [selectedService, setSelectedService] = useState<string>("all");
+  const [finishOpen, setFinishOpen] = useState(false);
+  const [finishingBookingId, setFinishingBookingId] = useState<string | null>(null);
+  const [finishData, setFinishData] = useState({
+    skin_condition: "",
+    recommendations: "",
+    flea_tick_found: false,
+  });
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingBookingId, setDeletingBookingId] = useState<string | null>(null);
   const { data: bookings, isLoading, error } = useGroomingBookings();
   const { data: services } = useGroomingServices();
   const startMutation = useStartGrooming();
@@ -33,43 +50,61 @@ export default function GroomingPage() {
     const matchesSearch =
       booking.booking_number.toLowerCase().includes(search.toLowerCase()) ||
       booking.customer_id.toLowerCase().includes(search.toLowerCase());
-    const matchesService =
-      selectedService === "all" || booking.service_id === selectedService;
+    const matchesService = selectedService === "all" || booking.service_id === selectedService;
     return matchesSearch && matchesService;
   });
 
   const handleStart = async (id: string) => {
     try {
       await startMutation.mutateAsync(id);
+      toast.success("Grooming started");
     } catch (err) {
-      console.error("Start grooming failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to start grooming");
     }
   };
 
-  const handleFinish = async (id: string) => {
-    const skinCondition = prompt("Skin condition (optional):") || undefined;
-    const recommendations = prompt("Recommendations (optional):") || undefined;
-    const fleaTickInput = prompt("Flea/tick found? (y/n):")?.toLowerCase();
-    const fleaTickFound = fleaTickInput === "y";
+  const handleFinishClick = (id: string) => {
+    setFinishingBookingId(id);
+    setFinishData({ skin_condition: "", recommendations: "", flea_tick_found: false });
+    setFinishOpen(true);
+  };
 
+  const handleFinish = async () => {
+    if (!finishingBookingId) return;
     try {
       await finishMutation.mutateAsync({
-        bookingId: id,
+        bookingId: finishingBookingId,
         input: {
-          booking_id: id,
-          skin_condition: skinCondition,
-          flea_tick_found: fleaTickFound,
-          recommendations: recommendations,
+          booking_id: finishingBookingId,
+          skin_condition: finishData.skin_condition || undefined,
+          flea_tick_found: finishData.flea_tick_found,
+          recommendations: finishData.recommendations || undefined,
         },
       });
+      toast.success("Grooming completed successfully");
+      setFinishOpen(false);
+      setFinishingBookingId(null);
+      setFinishData({ skin_condition: "", recommendations: "", flea_tick_found: false });
     } catch (err) {
-      console.error("Finish grooming failed:", err);
+      toast.error(err instanceof Error ? err.message : "Failed to finish grooming");
     }
   };
 
-  const handleCancel = async (id: string) => {
-    if (confirm("Are you sure you want to cancel this booking?")) {
-      await cancelMutation.mutateAsync(id);
+  const handleCancelClick = (id: string) => {
+    setDeletingBookingId(id);
+    setDeleteOpen(true);
+  };
+
+  const handleCancel = async () => {
+    if (!deletingBookingId) return;
+    try {
+      await cancelMutation.mutateAsync(deletingBookingId);
+      toast.success("Booking cancelled successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to cancel booking");
+    } finally {
+      setDeleteOpen(false);
+      setDeletingBookingId(null);
     }
   };
 
@@ -82,9 +117,7 @@ export default function GroomingPage() {
       header: "Booking #",
       accessorKey: "booking_number" as const,
       cell: ({ original }: { original: GroomingBooking }) => (
-        <div className="font-medium text-slate-900">
-          {original.booking_number}
-        </div>
+        <div className="font-medium text-slate-900">{original.booking_number}</div>
       ),
     },
     {
@@ -102,9 +135,7 @@ export default function GroomingPage() {
               <div
                 key={step}
                 className={`h-1.5 flex-1 rounded-full ${
-                  index <= getStatusStepIndex(original.status)
-                    ? "bg-primary-500"
-                    : "bg-slate-200"
+                  index <= getStatusStepIndex(original.status) ? "bg-primary-500" : "bg-slate-200"
                 }`}
               />
             ))}
@@ -131,17 +162,13 @@ export default function GroomingPage() {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => handleFinish(original.id)}
+              onClick={() => handleFinishClick(original.id)}
               title="Finish Grooming"
             >
               <CheckCircle className="h-4 w-4 text-success-600" />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleCancel(original.id)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => handleCancelClick(original.id)}>
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>
         </div>
@@ -150,12 +177,19 @@ export default function GroomingPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading grooming bookings...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
     return (
-      <div className="text-danger-500">Error loading grooming bookings</div>
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load grooming bookings</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
     );
   }
 
@@ -164,9 +198,7 @@ export default function GroomingPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Grooming</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredBookings?.length || 0} bookings
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredBookings?.length || 0} bookings</p>
         </div>
         <Button>
           <Plus className="h-4 w-4" />
@@ -218,6 +250,61 @@ export default function GroomingPage() {
             }
           />
         }
+      />
+
+      <Dialog open={finishOpen} onOpenChange={setFinishOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Finish Grooming</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <FormField label="Skin Condition (optional)">
+              <Input
+                value={finishData.skin_condition}
+                onChange={(e) => setFinishData({ ...finishData, skin_condition: e.target.value })}
+                placeholder="e.g., Healthy, Dry skin, Irritation"
+              />
+            </FormField>
+            <FormField label="Recommendations (optional)">
+              <Textarea
+                value={finishData.recommendations}
+                onChange={(e) => setFinishData({ ...finishData, recommendations: e.target.value })}
+                placeholder="Care recommendations for the pet owner"
+                rows={3}
+              />
+            </FormField>
+            <div className="flex items-center gap-2">
+              <input
+                id="flea-tick"
+                type="checkbox"
+                checked={finishData.flea_tick_found}
+                onChange={(e) =>
+                  setFinishData({ ...finishData, flea_tick_found: e.target.checked })
+                }
+                className="h-4 w-4 rounded border-slate-300"
+              />
+              <label htmlFor="flea-tick" className="text-sm text-slate-700">
+                Flea / tick found
+              </label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFinishOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleFinish}>Complete Grooming</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Cancel Booking"
+        description="Are you sure you want to cancel this grooming booking? This action cannot be undone."
+        confirmLabel="Cancel Booking"
+        variant="destructive"
+        onConfirm={handleCancel}
       />
     </div>
   );

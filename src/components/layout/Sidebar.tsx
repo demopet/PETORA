@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import {
   Users,
   PawPrint,
@@ -18,9 +18,18 @@ import {
   BarChart3,
   Settings,
   Home,
+  Moon,
+  Sun,
+  Menu,
+  ChevronLeft,
+  PawPrint as PawLogo,
+  LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { UserRole } from "@/types/user";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useTheme } from "@/app/providers/theme-provider";
+import { useState } from "react";
 
 interface SidebarProps {
   userRole: UserRole;
@@ -33,18 +42,8 @@ const menuItems = [
     label: "Dashboard",
     roles: ["OWNER", "ADMIN", "DOKTER", "KASIR"],
   },
-  {
-    to: "/customers",
-    icon: Users,
-    label: "Customers",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/pets",
-    icon: PawPrint,
-    label: "Pets",
-    roles: ["OWNER", "ADMIN", "DOKTER", "KASIR"],
-  },
+  { to: "/customers", icon: Users, label: "Customers", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/pets", icon: PawPrint, label: "Pets", roles: ["OWNER", "ADMIN", "DOKTER", "KASIR"] },
   {
     to: "/appointments",
     icon: Calendar,
@@ -57,94 +56,46 @@ const menuItems = [
     label: "Medical Records",
     roles: ["OWNER", "ADMIN", "DOKTER"],
   },
-  {
-    to: "/pet-hotel",
-    icon: Hotel,
-    label: "Pet Hotel",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/grooming",
-    icon: Scissors,
-    label: "Grooming",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/products",
-    icon: Package,
-    label: "Products",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/inventory",
-    icon: Warehouse,
-    label: "Inventory",
-    roles: ["OWNER", "ADMIN"],
-  },
+  { to: "/pet-hotel", icon: Hotel, label: "Pet Hotel", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/grooming", icon: Scissors, label: "Grooming", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/products", icon: Package, label: "Products", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/inventory", icon: Warehouse, label: "Inventory", roles: ["OWNER", "ADMIN"] },
   {
     to: "/purchase-orders",
     icon: ShoppingCart,
     label: "Purchase Orders",
     roles: ["OWNER", "ADMIN"],
   },
-  {
-    to: "/pos",
-    icon: Receipt,
-    label: "POS",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/invoices",
-    icon: FileText,
-    label: "Invoices",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
-  {
-    to: "/cash-shifts",
-    icon: Wallet,
-    label: "Cash Shifts",
-    roles: ["OWNER", "ADMIN", "KASIR"],
-  },
+  { to: "/pos", icon: Receipt, label: "POS", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/invoices", icon: FileText, label: "Invoices", roles: ["OWNER", "ADMIN", "KASIR"] },
+  { to: "/cash-shifts", icon: Wallet, label: "Cash Shifts", roles: ["OWNER", "ADMIN", "KASIR"] },
   { to: "/loyalty", icon: Award, label: "Loyalty", roles: ["OWNER", "ADMIN"] },
-  {
-    to: "/promotions",
-    icon: Tag,
-    label: "Promotions",
-    roles: ["OWNER", "ADMIN"],
-  },
-  {
-    to: "/expenses",
-    icon: TrendingUp,
-    label: "Expenses",
-    roles: ["OWNER", "ADMIN"],
-  },
-  {
-    to: "/reports",
-    icon: BarChart3,
-    label: "Reports",
-    roles: ["OWNER", "ADMIN"],
-  },
-  {
-    to: "/settings",
-    icon: Settings,
-    label: "Settings",
-    roles: ["OWNER", "ADMIN"],
-  },
+  { to: "/promotions", icon: Tag, label: "Promotions", roles: ["OWNER", "ADMIN"] },
+  { to: "/expenses", icon: TrendingUp, label: "Expenses", roles: ["OWNER", "ADMIN"] },
+  { to: "/reports", icon: BarChart3, label: "Reports", roles: ["OWNER", "ADMIN"] },
+  { to: "/settings", icon: Settings, label: "Settings", roles: ["OWNER", "ADMIN"] },
 ];
 
 export default function Sidebar({ userRole }: SidebarProps) {
-  const filteredItems = menuItems.filter((item) =>
-    item.roles.includes(userRole),
-  );
+  const navigate = useNavigate();
+  const { logout } = useAuth();
+  const { resolvedTheme, toggleTheme } = useTheme();
+  const [collapsed, setCollapsed] = useState(false);
+  const filteredItems = menuItems.filter((item) => item.roles.includes(userRole));
 
   return (
-    <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white">
-      <div className="flex h-16 items-center border-b border-slate-200 px-6">
-        <PawPrint className="h-6 w-6 text-primary-600" />
-        <span className="ml-2 text-lg font-bold text-slate-900">Petora</span>
+    <aside
+      className={cn(
+        "flex h-screen flex-col border-r border-slate-200 bg-white transition-all duration-300",
+        collapsed ? "w-16" : "w-64"
+      )}
+    >
+      <div className="flex h-16 items-center border-b border-slate-200 px-4">
+        <PawLogo className="h-6 w-6 text-primary-600" />
+        {!collapsed && <span className="ml-2 text-lg font-bold text-slate-900">Petora</span>}
       </div>
 
-      <nav className="flex-1 space-y-1 overflow-y-auto p-4">
+      <nav className="flex-1 space-y-1 overflow-y-auto p-2">
         {filteredItems.map((item) => (
           <NavLink
             key={item.to}
@@ -155,17 +106,78 @@ export default function Sidebar({ userRole }: SidebarProps) {
                 isActive
                   ? "bg-primary-50 text-primary-600"
                   : "text-slate-600 hover:bg-slate-50 hover:text-slate-900",
+                collapsed && "justify-center px-2"
               )
             }
+            title={collapsed ? item.label : undefined}
           >
-            <item.icon className="h-5 w-5" />
-            {item.label}
+            <item.icon className="h-5 w-5 shrink-0" />
+            {!collapsed && <span>{item.label}</span>}
           </NavLink>
         ))}
       </nav>
 
-      <div className="border-t border-slate-200 p-4">
-        <div className="text-xs text-slate-500">Petora v0.1.0</div>
+      <div className="border-t border-slate-200 p-2 space-y-1">
+        <button
+          type="button"
+          onClick={() => setCollapsed(!collapsed)}
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors w-full",
+            collapsed && "justify-center px-2"
+          )}
+          title="Toggle sidebar"
+          aria-label="Toggle sidebar"
+        >
+          {collapsed ? (
+            <Menu className="h-5 w-5 shrink-0" />
+          ) : (
+            <ChevronLeft className="h-5 w-5 shrink-0" />
+          )}
+          {!collapsed && <span>Collapse</span>}
+        </button>
+        <button
+          type="button"
+          onClick={toggleTheme}
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors w-full",
+            collapsed && "justify-center px-2"
+          )}
+          title="Toggle dark mode"
+          aria-label="Toggle dark mode"
+        >
+          {resolvedTheme === "dark" ? (
+            <Sun className="h-5 w-5 shrink-0" />
+          ) : (
+            <Moon className="h-5 w-5 shrink-0" />
+          )}
+          {!collapsed && <span>Dark Mode</span>}
+        </button>
+        <button
+          type="button"
+          onClick={() => navigate("/settings")}
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors w-full",
+            collapsed && "justify-center px-2"
+          )}
+          title="Settings"
+          aria-label="Settings"
+        >
+          <Settings className="h-5 w-5 shrink-0" />
+          {!collapsed && <span>Settings</span>}
+        </button>
+        <button
+          type="button"
+          onClick={logout}
+          className={cn(
+            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900 transition-colors w-full",
+            collapsed && "justify-center px-2"
+          )}
+          title="Logout"
+          aria-label="Logout"
+        >
+          <LogOut className="h-5 w-5 shrink-0" />
+          {!collapsed && <span>Logout</span>}
+        </button>
       </div>
     </aside>
   );

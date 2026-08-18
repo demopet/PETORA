@@ -5,15 +5,19 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { useExpenses } from "../hooks/use-expenses";
 import { useApproveExpense } from "../hooks/use-expenses";
 import { useRejectExpense } from "../hooks/use-expenses";
 import type { Expense } from "@/types/expense";
+import { toast } from "sonner";
 
 export default function ExpensesPage() {
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [rejectOpen, setRejectOpen] = useState(false);
+  const [rejectingExpenseId, setRejectingExpenseId] = useState<string | null>(null);
   const { data: expenses, isLoading, error } = useExpenses();
   const approveMutation = useApproveExpense();
   const rejectMutation = useRejectExpense();
@@ -23,12 +27,29 @@ export default function ExpensesPage() {
   );
 
   const handleApprove = async (id: string) => {
-    await approveMutation.mutateAsync({ id, callerUserId: user?.id || "" });
+    try {
+      await approveMutation.mutateAsync({ id, callerUserId: user?.id || "" });
+      toast.success("Expense approved successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to approve expense");
+    }
   };
 
-  const handleReject = async (id: string) => {
-    if (confirm("Are you sure you want to reject this expense?")) {
-      await rejectMutation.mutateAsync({ id, callerUserId: user?.id || "" });
+  const handleRejectClick = (id: string) => {
+    setRejectingExpenseId(id);
+    setRejectOpen(true);
+  };
+
+  const handleReject = async () => {
+    if (!rejectingExpenseId) return;
+    try {
+      await rejectMutation.mutateAsync({ id: rejectingExpenseId, callerUserId: user?.id || "" });
+      toast.success("Expense rejected successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reject expense");
+    } finally {
+      setRejectOpen(false);
+      setRejectingExpenseId(null);
     }
   };
 
@@ -70,7 +91,7 @@ export default function ExpensesPage() {
               <Button variant="ghost" size="sm" onClick={() => handleApprove(original.id)}>
                 Approve
               </Button>
-              <Button variant="ghost" size="sm" onClick={() => handleReject(original.id)}>
+              <Button variant="ghost" size="sm" onClick={() => handleRejectClick(original.id)}>
                 Reject
               </Button>
             </>
@@ -81,11 +102,20 @@ export default function ExpensesPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading expenses...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading expenses</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load expenses</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -131,6 +161,16 @@ export default function ExpensesPage() {
             }
           />
         }
+      />
+
+      <ConfirmDialog
+        open={rejectOpen}
+        onOpenChange={setRejectOpen}
+        title="Reject Expense"
+        description="Are you sure you want to reject this expense? This action cannot be undone."
+        confirmLabel="Reject"
+        variant="destructive"
+        onConfirm={handleReject}
       />
     </div>
   );

@@ -1,7 +1,8 @@
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { toast } from "sonner";
 import {
   useAppointment,
@@ -22,6 +23,7 @@ const statusColors: Record<AppointmentStatus, string> = {
 export default function AppointmentDetailPage() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
+  const [cancelOpen, setCancelOpen] = useState(false);
 
   const { data: appointment, isLoading, error } = useAppointment(appointmentId || "");
   const updateStatusMutation = useUpdateAppointmentStatus();
@@ -89,9 +91,12 @@ export default function AppointmentDetailPage() {
   };
 
   const handleCancel = async () => {
-    if (confirm("Are you sure you want to cancel this appointment?")) {
+    try {
       await cancelMutation.mutateAsync(appointment.id);
+      toast.success("Appointment cancelled successfully");
       navigate("/appointments");
+    } catch {
+      toast.error("Failed to cancel appointment");
     }
   };
 
@@ -190,7 +195,11 @@ export default function AppointmentDetailPage() {
 
           {availableTransitions.length === 0 && appointment.status !== "CANCELLED" && (
             <div>
-              <Button onClick={handleCancel} disabled={cancelMutation.isPending} variant="outline">
+              <Button
+                onClick={() => setCancelOpen(true)}
+                disabled={cancelMutation.isPending}
+                variant="outline"
+              >
                 Cancel Appointment
               </Button>
             </div>
@@ -214,6 +223,16 @@ export default function AppointmentDetailPage() {
           </Button>
         </div>
       )}
+
+      <ConfirmDialog
+        open={cancelOpen}
+        onOpenChange={setCancelOpen}
+        title="Cancel Appointment"
+        description="Are you sure you want to cancel this appointment? This action cannot be undone."
+        confirmLabel="Cancel Appointment"
+        variant="destructive"
+        onConfirm={handleCancel}
+      />
     </div>
   );
 }

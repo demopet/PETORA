@@ -1,9 +1,7 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Phone, MapPin, Plus, UserCheck } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCustomers } from "../hooks/use-customers";
-import { usePets } from "@/features/pets/hooks/use-pets";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DataTable } from "@/components/ui/data-table";
 import {
@@ -19,6 +17,14 @@ import { useAuth } from "@/features/auth/context/AuthContext";
 import { useConvertGuest } from "../hooks/use-customers";
 import { toast } from "sonner";
 import type { Pet } from "@/types/pet";
+import { useCustomers } from "../hooks/use-customers";
+import { usePets } from "@/features/pets/hooks/use-pets";
+import { useAppointments } from "@/features/appointments/hooks/use-appointments";
+import { useInvoices } from "@/features/invoices/hooks/use-invoices";
+import { StatCard } from "@/components/ui/stat-card";
+import { Timeline } from "@/components/data-display/timeline";
+import { formatCurrency } from "@/lib/utils/format";
+import { formatDateTime } from "@/lib/utils/format";
 
 export default function CustomerDetailPage() {
   const { customerId } = useParams<{ customerId: string }>();
@@ -27,11 +33,14 @@ export default function CustomerDetailPage() {
   const { data: customers } = useCustomers();
   const customer = customers?.find((c) => c.id === customerId);
   const { data: pets = [] } = usePets(customerId);
+  const { data: appointments = [] } = useAppointments();
+  const { data: invoices = [] } = useInvoices();
   const convertGuestMutation = useConvertGuest({ callerUserId: user?.id });
 
   const [convertOpen, setConvertOpen] = useState(false);
   const [convertUsername, setConvertUsername] = useState("");
   const [convertPin, setConvertPin] = useState("");
+  const [activeTab, setActiveTab] = useState("overview");
 
   if (!customerId) {
     return (
@@ -58,6 +67,12 @@ export default function CustomerDetailPage() {
     );
   }
 
+  const customerAppointments = appointments.filter((a) => a.customer_id === customerId);
+  const customerInvoices = invoices.filter((inv) => inv.customer_id === customerId);
+  const totalSpent = customerInvoices
+    .filter((inv) => inv.status === "PAID")
+    .reduce((sum, inv) => sum + inv.total_amount, 0);
+
   const petColumns = [
     {
       header: "Name",
@@ -79,13 +94,53 @@ export default function CustomerDetailPage() {
       header: "Actions",
       accessorKey: "id" as const,
       cell: ({ original }: { original: Pet }) => (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => navigate(`/pets/${original.id}`)}
-        >
+        <Button variant="ghost" size="sm" onClick={() => navigate(`/pets/${original.id}`)}>
           View
         </Button>
+      ),
+    },
+  ];
+
+  const appointmentColumns = [
+    {
+      header: "Date",
+      accessorKey: "appointment_date" as const,
+    },
+    {
+      header: "Time",
+      accessorKey: "appointment_time" as const,
+    },
+    {
+      header: "Status",
+      accessorKey: "status" as const,
+      cell: ({ original }: { original: (typeof appointments)[0] }) => (
+        <StatusBadge status={original.status} />
+      ),
+    },
+  ];
+
+  const invoiceColumns = [
+    {
+      header: "Invoice",
+      accessorKey: "invoice_number" as const,
+    },
+    {
+      header: "Date",
+      accessorKey: "created_at" as const,
+      cell: ({ original }: { original: (typeof invoices)[0] }) =>
+        formatDateTime(original.created_at),
+    },
+    {
+      header: "Total",
+      accessorKey: "total_amount" as const,
+      cell: ({ original }: { original: (typeof invoices)[0] }) =>
+        formatCurrency(original.total_amount),
+    },
+    {
+      header: "Status",
+      accessorKey: "status" as const,
+      cell: ({ original }: { original: (typeof invoices)[0] }) => (
+        <StatusBadge status={original.status} />
       ),
     },
   ];
@@ -125,15 +180,12 @@ export default function CustomerDetailPage() {
       toast.success("Customer converted to registered successfully.");
       setConvertOpen(false);
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to convert customer",
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to convert customer");
     }
   };
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <Button
@@ -160,12 +212,7 @@ export default function CustomerDetailPage() {
         <div className="flex items-center gap-2">
           <StatusBadge status={customer.is_active ? "ACTIVE" : "ARCHIVED"} />
           {customer.is_guest && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleConvertClick}
-              className="gap-2"
-            >
+            <Button variant="outline" size="sm" onClick={handleConvertClick} className="gap-2">
               <UserCheck className="h-4 w-4" />
               Convert to Registered
             </Button>
@@ -173,112 +220,167 @@ export default function CustomerDetailPage() {
         </div>
       </div>
 
-      {/* Contact Info Card */}
-      <div className="grid grid-cols-1 gap-6 rounded-lg bg-white p-6 shadow-sm md:grid-cols-2">
-        <div>
-          <p className="text-sm font-medium text-slate-500 uppercase">
-            Basic Information
-          </p>
-          <div className="mt-4 space-y-4">
-            {customer.phone && (
-              <div className="flex items-center gap-3">
-                <Phone className="h-4 w-4 text-slate-400" />
-                <a
-                  href={`tel:${customer.phone}`}
-                  className="text-slate-900 hover:text-primary-600"
-                >
-                  {customer.phone}
-                </a>
-              </div>
-            )}
-            {customer.email && (
-              <div className="flex items-center gap-3">
-                <Mail className="h-4 w-4 text-slate-400" />
-                <a
-                  href={`mailto:${customer.email}`}
-                  className="text-slate-900 hover:text-primary-600"
-                >
-                  {customer.email}
-                </a>
-              </div>
-            )}
-            {customer.address && (
-              <div className="flex items-start gap-3">
-                <MapPin className="mt-0.5 h-4 w-4 text-slate-400" />
-                <p className="text-slate-900">{customer.address}</p>
-              </div>
-            )}
+      <div className="grid grid-cols-2 gap-6 rounded-lg bg-white p-6 shadow-sm md:grid-cols-4">
+        <StatCard title="Total Pets" value={String(pets.length)} />
+        <StatCard title="Total Spent" value={formatCurrency(totalSpent)} />
+        <StatCard title="Appointments" value={String(customerAppointments.length)} />
+        <StatCard title="Invoices" value={String(customerInvoices.length)} />
+      </div>
+
+      <div className="space-y-6 rounded-lg bg-white p-6 shadow-sm">
+        <div className="border-b border-slate-200">
+          <div className="flex gap-1">
+            <button
+              key="overview"
+              onClick={() => setActiveTab("overview")}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "overview"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Overview
+            </button>
+            <button
+              key="pets"
+              onClick={() => setActiveTab("pets")}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "pets"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Pets ({pets.length})
+            </button>
+            <button
+              key="appointments"
+              onClick={() => setActiveTab("appointments")}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "appointments"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Appointments
+            </button>
+            <button
+              key="invoices"
+              onClick={() => setActiveTab("invoices")}
+              className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === "invoices"
+                  ? "border-primary-500 text-primary-600"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Invoices
+            </button>
           </div>
         </div>
-
-        <div>
-          <p className="text-sm font-medium text-slate-500 uppercase">
-            Additional Information
-          </p>
-          <div className="mt-4 space-y-4">
-            {customer.emergency_contact && (
+        <div className="pt-6">
+          {activeTab === "overview" && (
+            <div className="space-y-6">
               <div>
-                <p className="text-xs text-slate-500">Emergency Contact</p>
-                <p className="text-slate-900">{customer.emergency_contact}</p>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Contact Information</h3>
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 uppercase">
+                      Basic Information
+                    </p>
+                    <div className="mt-4 space-y-4">
+                      {customer.phone && (
+                        <div className="flex items-center gap-3">
+                          <Phone className="h-4 w-4 text-slate-400" />
+                          <a
+                            href={`tel:${customer.phone}`}
+                            className="text-slate-900 hover:text-primary-600"
+                          >
+                            {customer.phone}
+                          </a>
+                        </div>
+                      )}
+                      {customer.email && (
+                        <div className="flex items-center gap-3">
+                          <Mail className="h-4 w-4 text-slate-400" />
+                          <a
+                            href={`mailto:${customer.email}`}
+                            className="text-slate-900 hover:text-primary-600"
+                          >
+                            {customer.email}
+                          </a>
+                        </div>
+                      )}
+                      {customer.address && (
+                        <div className="flex items-start gap-3">
+                          <MapPin className="mt-0.5 h-4 w-4 text-slate-400" />
+                          <p className="text-slate-900">{customer.address}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500 uppercase">
+                      Additional Information
+                    </p>
+                    <div className="mt-4 space-y-4">
+                      {customer.emergency_contact && (
+                        <div>
+                          <p className="text-xs text-slate-500">Emergency Contact</p>
+                          <p className="text-slate-900">{customer.emergency_contact}</p>
+                        </div>
+                      )}
+                      <div>
+                        <p className="text-xs text-slate-500">Customer Type</p>
+                        <p className="text-slate-900">
+                          {customer.is_guest ? "Guest" : "Registered"}
+                        </p>
+                      </div>
+                      {customer.notes && (
+                        <div>
+                          <p className="text-xs text-slate-500">Notes</p>
+                          <p className="text-slate-900">{customer.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
-            )}
-            <div>
-              <p className="text-xs text-slate-500">Customer Type</p>
-              <p className="text-slate-900">
-                {customer.is_guest ? "Guest" : "Registered"}
-              </p>
+              <div>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Recent Activity</h3>
+                <Timeline
+                  items={customerAppointments.slice(0, 5).map((a) => ({
+                    date: a.appointment_date,
+                    title: `Appointment ${a.status}`,
+                    description: `At ${a.appointment_time} with ${a.customer_id}`,
+                  }))}
+                />
+              </div>
             </div>
-            {customer.notes && (
-              <div>
-                <p className="text-xs text-slate-500">Notes</p>
-                <p className="text-slate-900">{customer.notes}</p>
-              </div>
-            )}
-          </div>
+          )}
+          {activeTab === "pets" && (
+            <DataTable
+              columns={petColumns}
+              data={pets}
+              searchKey="name"
+              emptyState={<div>No pets found</div>}
+            />
+          )}
+          {activeTab === "appointments" && (
+            <DataTable
+              columns={appointmentColumns}
+              data={customerAppointments}
+              emptyState={<div>No appointments found</div>}
+            />
+          )}
+          {activeTab === "invoices" && (
+            <DataTable
+              columns={invoiceColumns}
+              data={customerInvoices}
+              emptyState={<div>No invoices found</div>}
+            />
+          )}
         </div>
       </div>
 
-      {/* Pets Section */}
-      <div className="space-y-4 rounded-lg bg-white p-6 shadow-sm">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-900">Pets</h2>
-          <Button
-            size="sm"
-            onClick={() => navigate(`/pets?customerId=${customerId}`)}
-            className="gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            Add Pet
-          </Button>
-        </div>
-
-        {pets.length > 0 ? (
-          <DataTable
-            columns={petColumns}
-            data={pets}
-            searchKey="name"
-            emptyState={<div>No pets found</div>}
-          />
-        ) : (
-          <div className="rounded-lg bg-slate-50 p-8 text-center">
-            <p className="text-slate-500">
-              No pets registered for this customer
-            </p>
-          </div>
-        )}
-      </div>
-
-      {/* Statistics Card */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="rounded-lg bg-white p-4 shadow-sm">
-          <p className="text-sm font-medium text-slate-500">Total Pets</p>
-          <p className="mt-2 text-3xl font-bold text-slate-900">
-            {pets.length}
-          </p>
-        </div>
-      </div>
-
-      {/* Convert Guest Dialog */}
       <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
         <DialogContent>
           <DialogHeader>
@@ -286,8 +388,8 @@ export default function CustomerDetailPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm text-slate-600">
-              Converting <strong>{customer.name}</strong> from guest to
-              registered. You can optionally create a user account for them.
+              Converting <strong>{customer.name}</strong> from guest to registered. You can
+              optionally create a user account for them.
             </p>
             <FormField label="Username (optional)">
               <Input

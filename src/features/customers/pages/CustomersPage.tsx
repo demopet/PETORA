@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { FormField } from "@/components/ui/form-field";
 import { CustomerForm } from "../components/CustomerForm";
 import {
@@ -26,15 +27,9 @@ import {
 import { useAuth } from "@/features/auth/context/AuthContext";
 import type { Customer, CustomerTag } from "@/types/customer";
 import { toast } from "sonner";
+import { CUSTOMER_TAG_OPTIONS } from "@/lib/utils/constants";
 
 const ITEMS_PER_PAGE = 10;
-const TAG_OPTIONS: Array<{ value: string; label: string }> = [
-  { value: "all", label: "All Tags" },
-  { value: "VIP", label: "VIP" },
-  { value: "REGULAR", label: "Regular" },
-  { value: "NEW", label: "New" },
-  { value: "BLACKLIST", label: "Blacklist" },
-];
 
 export default function CustomersPage() {
   const navigate = useNavigate();
@@ -48,11 +43,15 @@ export default function CustomersPage() {
   const [convertingCustomer, setConvertingCustomer] = useState<Customer | null>(null);
   const [convertUsername, setConvertUsername] = useState("");
   const [convertPin, setConvertPin] = useState("");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingCustomer, setDeletingCustomer] = useState<Customer | null>(null);
   const { data: customers, isLoading, error } = useCustomers();
   const createMutation = useCreateCustomer({ callerUserId: user?.id });
   const updateMutation = useUpdateCustomer({ callerUserId: user?.id });
   const deleteMutation = useDeleteCustomer({ callerUserId: user?.id });
   const convertMutation = useConvertGuest({ callerUserId: user?.id });
+
+  const TAG_OPTIONS = [{ value: "all", label: "All Tags" }, ...CUSTOMER_TAG_OPTIONS];
 
   const filteredCustomers = useMemo(() => {
     let result = customers || [];
@@ -86,9 +85,21 @@ export default function CustomersPage() {
     }
   }, [page, totalPages]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this customer?")) {
-      await deleteMutation.mutateAsync(id);
+  const handleDeleteClick = (customer: Customer) => {
+    setDeletingCustomer(customer);
+    setDeleteOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingCustomer) return;
+    try {
+      await deleteMutation.mutateAsync(deletingCustomer.id);
+      toast.success("Customer deleted successfully.");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete customer");
+    } finally {
+      setDeleteOpen(false);
+      setDeletingCustomer(null);
     }
   };
 
@@ -190,7 +201,7 @@ export default function CustomersPage() {
           <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(original.id)}>
+          <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(original)}>
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>
         </div>
@@ -199,11 +210,20 @@ export default function CustomersPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading customers...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading customers</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load customers</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -377,6 +397,16 @@ export default function CustomersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete Customer"
+        description={`Are you sure you want to delete ${deletingCustomer?.name || "this customer"}? This action cannot be undone.`}
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
