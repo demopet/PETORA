@@ -6,8 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { ProductForm } from '../components/ProductForm'
-import { useProducts } from '../hooks/use-products'
-import { useArchiveProduct } from '../hooks/use-products'
+import { useProducts, useCreateProduct, useUpdateProduct, useArchiveProduct } from '../hooks/use-products'
 import type { Product } from '@/types/product'
 
 export default function ProductsPage() {
@@ -15,6 +14,8 @@ export default function ProductsPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingProduct, setEditingProduct] = useState<Product | null>(null)
   const { data: products, isLoading, error } = useProducts()
+  const createMutation = useCreateProduct()
+  const updateMutation = useUpdateProduct()
   const archiveMutation = useArchiveProduct()
 
   const filteredProducts = products?.filter((product) =>
@@ -166,12 +167,27 @@ export default function ProductsPage() {
       <ProductForm
         open={formOpen}
         onOpenChange={setFormOpen}
-        onSubmit={(_data) => {
+        onSubmit={async (data) => {
           if (editingProduct) {
-            // update mutation
-          } else {
-            // create mutation
+            await updateMutation.mutateAsync({
+              id: editingProduct.id,
+              input: {
+                ...data,
+                category_id: data.category_id || undefined,
+                supplier_id: data.supplier_id || undefined,
+              },
+            })
+            return
           }
+
+          await createMutation.mutateAsync({
+            ...data,
+            category_id: data.category_id || undefined,
+            supplier_id: data.supplier_id || undefined,
+            barcode: data.barcode || undefined,
+            description: data.description || undefined,
+            expiry_date: data.expiry_date || undefined,
+          })
         }}
         categories={[]}
         suppliers={[]}

@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils'
 interface NumericKeypadProps {
   length?: number
   value: string
-  onChange: (value: string) => void
+  onChange: (_value: string) => void
   onSubmit: () => void
   mask?: boolean
   showToggle?: boolean

@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { AppointmentForm } from '../components/AppointmentForm'
-import { useAppointments } from '../hooks/use-appointments'
+import { useAppointments, useCreateAppointment } from '../hooks/use-appointments'
 import { useCustomers } from '@/features/customers/hooks/use-customers'
 import { usePets } from '@/features/pets/hooks/use-pets'
 import type { Appointment } from '@/types/appointment'
@@ -17,6 +17,7 @@ export default function AppointmentsPage() {
   const { data: appointments, isLoading, error } = useAppointments()
   const { data: customers } = useCustomers()
   const { data: pets } = usePets()
+  const createAppointmentMutation = useCreateAppointment()
 
   const filteredAppointments = appointments?.filter((apt) =>
     apt.complaint?.toLowerCase().includes(search.toLowerCase()) ||
@@ -111,8 +112,14 @@ export default function AppointmentsPage() {
       <AppointmentForm
         open={formOpen}
         onOpenChange={setFormOpen}
-        onSubmit={(_data) => {
-          // create mutation
+        onSubmit={async (data) => {
+          await createAppointmentMutation.mutateAsync({
+            ...data,
+            doctor_id: data.doctor_id || undefined,
+            complaint: data.complaint || undefined,
+            notes: data.notes || undefined,
+            is_from_portal: false,
+          })
         }}
         customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
         pets={pets?.map(p => ({ id: p.id, name: p.name, customer_id: p.customer_id })) || []}

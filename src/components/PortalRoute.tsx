@@ -23,7 +23,7 @@ export default function PortalRoute({ children }: PortalRouteProps) {
   }
 
   if (user.role !== 'CUSTOMER') {
-    return <Navigate to="/app" replace />
+    return <Navigate to="/dashboard" replace />
   }
 
   return <>{children}</>

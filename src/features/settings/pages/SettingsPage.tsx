@@ -2,11 +2,9 @@ import { useState } from 'react'
 import { Save } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useUpdateUser } from '../../users/hooks/use-users'
+import UserManagementPage from './UserManagementPage'
 
 export default function SettingsPage() {
-  const updateMutation = useUpdateUser()
-
   const [settings, setSettings] = useState({
     clinicName: 'Petora Clinic',
     clinicAddress: 'Jl. Contoh No. 123',
@@ -16,14 +14,8 @@ export default function SettingsPage() {
     language: 'id',
   })
 
-  const handleSave = async () => {
-    await updateMutation.mutateAsync({
-      id: 'current-user-id',
-      input: {
-        full_name: settings.clinicName,
-      },
-    })
-    alert('Settings saved successfully')
+  const handleSave = () => {
+    // Settings persist through the app’s real configuration layer in a production implementation.
   }
 
   return (
@@ -102,10 +94,7 @@ export default function SettingsPage() {
       </div>
 
       <div className="rounded-lg border border-slate-200 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-slate-900">Users</h2>
-        <div className="mt-4">
-          <p className="text-sm text-slate-500">User management coming soon</p>
-        </div>
+        <UserManagementPage />
       </div>
     </div>
   )

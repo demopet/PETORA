@@ -5,8 +5,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { PetForm } from '../components/PetForm'
-import { usePets } from '../hooks/use-pets'
-import { useDeletePet } from '../hooks/use-pets'
+import { usePets, useCreatePet, useUpdatePet, useDeletePet } from '../hooks/use-pets'
 import { useCustomers } from '@/features/customers/hooks/use-customers'
 import type { Pet } from '@/types/pet'
 
@@ -20,6 +19,8 @@ export default function PetsPage({ customerId }: PetsPageProps) {
   const [editingPet, setEditingPet] = useState<Pet | null>(null)
   const { data: pets, isLoading, error } = usePets(customerId)
   const { data: customers } = useCustomers()
+  const createMutation = useCreatePet()
+  const updateMutation = useUpdatePet()
   const deleteMutation = useDeletePet()
 
   const filteredPets = pets?.filter((pet) =>
@@ -138,12 +139,25 @@ export default function PetsPage({ customerId }: PetsPageProps) {
       <PetForm
         open={formOpen}
         onOpenChange={setFormOpen}
-        onSubmit={(_data) => {
+        onSubmit={async (data) => {
           if (editingPet) {
-            // update mutation
-          } else {
-            // create mutation
+            await updateMutation.mutateAsync({
+              id: editingPet.id,
+              input: {
+                ...data,
+                customer_id: data.customer_id || editingPet.customer_id,
+              },
+            })
+            return
           }
+
+          await createMutation.mutateAsync({
+            ...data,
+            customer_id: data.customer_id,
+            gender: data.gender || undefined,
+            birth_date: data.birth_date || undefined,
+            microchip_number: data.microchip_number || undefined,
+          })
         }}
         customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
         initialData={editingPet ? {

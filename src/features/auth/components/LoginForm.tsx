@@ -3,7 +3,7 @@ import { Input } from '@/components/ui/input'
 import { NumericKeypad } from './NumericKeypad'
 
 interface LoginFormProps {
-  onSubmit: (credentials: { username: string; pin: string }) => void
+  onSubmit: (_credentials: { username: string; pin: string }) => void
   isLoading?: boolean
   error?: string | null
   lockoutUntil?: Date | null

@@ -14,10 +14,10 @@ interface AuthContextValue {
   user: AuthUser | null
   isLoading: boolean
   isAuthenticated: boolean
-  login: (credentials: LoginCredentials) => Promise<void>
+  login: (_credentials: LoginCredentials) => Promise<void>
   logout: () => Promise<void>
-  changePin: (oldPin: string, newPin: string) => Promise<void>
-  resetPin: (targetUserId: string, newPin: string) => Promise<void>
+  changePin: (_oldPin: string, _newPin: string) => Promise<void>
+  resetPin: (_targetUserId: string, _newPin: string) => Promise<void>
   refreshUser: () => Promise<void>
 }
 

@@ -22,6 +22,7 @@ import PromotionsPage from '@/features/promotions/pages/PromotionsPage'
 import ExpensesPage from '@/features/expenses/pages/ExpensesPage'
 import ReportsPage from '@/features/reports/pages/ReportsPage'
 import SettingsPage from '@/features/settings/pages/SettingsPage'
+import PortalApp from '@/features/portal/PortalApp'
 
 function App() {
   return (
@@ -51,7 +52,8 @@ function App() {
         <Route path="settings/*" element={<ProtectedRoute requiredRole={['OWNER', 'ADMIN']}><SettingsPage /></ProtectedRoute>} />
       </Route>
 
-      <Route path="/portal/*" element={<PortalRoute><div>Customer Portal</div></PortalRoute>} />
+      <Route path="/portal/*" element={<PortalRoute><PortalApp /></PortalRoute>} />
+      <Route path="/app/*" element={<Navigate to="/dashboard" replace />} />
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

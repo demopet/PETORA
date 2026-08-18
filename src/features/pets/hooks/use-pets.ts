@@ -4,7 +4,7 @@ import type { Pet, CreatePetInput, UpdatePetInput } from '@/types/pet'
 
 export function usePets(customerId?: string) {
   return useQuery({
-    queryKey: ['pets', customerId],
+    queryKey: ['pets', customerId ?? 'all'],
     queryFn: async () => {
       let query = supabase
         .from('pets')
@@ -20,7 +20,6 @@ export function usePets(customerId?: string) {
       if (error) throw error
       return data as Pet[]
     },
-    enabled: !!customerId,
   })
 }
 

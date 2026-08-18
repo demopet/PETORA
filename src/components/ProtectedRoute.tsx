@@ -12,7 +12,7 @@ interface ProtectedRouteProps {
 
 function getDashboardForRole(role: UserRole): string {
   if (role === 'CUSTOMER') return '/portal'
-  return '/app'
+  return '/dashboard'
 }
 
 export default function ProtectedRoute({ children, requiredRole, redirectTo }: ProtectedRouteProps) {

@@ -6,8 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CustomerForm } from '../components/CustomerForm'
-import { useCustomers } from '../hooks/use-customers'
-import { useDeleteCustomer } from '../hooks/use-customers'
+import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from '../hooks/use-customers'
 import type { Customer } from '@/types/customer'
 
 export default function CustomersPage() {
@@ -15,6 +14,8 @@ export default function CustomersPage() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
   const { data: customers, isLoading, error } = useCustomers()
+  const createMutation = useCreateCustomer()
+  const updateMutation = useUpdateCustomer()
   const deleteMutation = useDeleteCustomer()
 
   const filteredCustomers = customers?.filter((customer) =>
@@ -134,12 +135,24 @@ export default function CustomersPage() {
       <CustomerForm
         open={formOpen}
         onOpenChange={setFormOpen}
-        onSubmit={(_data) => {
+        onSubmit={async (data) => {
           if (editingCustomer) {
-            // update mutation
-          } else {
-            // create mutation
+            await updateMutation.mutateAsync({
+              id: editingCustomer.id,
+              input: {
+                ...data,
+                tags: data.tags ?? editingCustomer.tags,
+                is_guest: data.is_guest ?? editingCustomer.is_guest,
+              },
+            })
+            return
           }
+
+          await createMutation.mutateAsync({
+            ...data,
+            tags: data.tags ?? [],
+            is_guest: data.is_guest ?? false,
+          })
         }}
         initialData={editingCustomer ? {
           name: editingCustomer.name,
