@@ -16,7 +16,7 @@ interface NumericKeypadProps {
 }
 
 export function NumericKeypad({
-  length = 6,
+  length = 8,
   value,
   onChange,
   onSubmit,
@@ -36,7 +36,7 @@ export function NumericKeypad({
       if (isDisabled || value.length >= length) return;
       onChange(value + digit);
     },
-    [isDisabled, value, length, onChange],
+    [isDisabled, value, length, onChange]
   );
 
   const handleBackspace = useCallback(() => {
@@ -99,7 +99,7 @@ export function NumericKeypad({
             : isFocused && !isDisabled
               ? "border-primary-500 ring-2 ring-primary-100"
               : "border-slate-300",
-          hasValue ? "text-slate-900" : "text-slate-400",
+          hasValue ? "text-slate-900" : "text-slate-400"
         )}
         data-testid={`pin-box-${i}`}
       >
@@ -150,11 +150,7 @@ export function NumericKeypad({
             data-testid="key-toggle"
             aria-label={isMasked ? "Show PIN" : "Hide PIN"}
           >
-            {isMasked ? (
-              <Eye className="h-5 w-5" />
-            ) : (
-              <EyeOff className="h-5 w-5" />
-            )}
+            {isMasked ? <Eye className="h-5 w-5" /> : <EyeOff className="h-5 w-5" />}
           </Button>
         ) : (
           <div className="h-14 w-20" />

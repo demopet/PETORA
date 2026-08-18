@@ -1,4 +1,5 @@
-import { useState, useParams, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
@@ -59,7 +60,10 @@ export default function AppointmentDetailPage() {
           <ArrowLeft className="h-4 w-4" />
           Back
         </Button>
-        <div className="text-danger-500">Error loading appointment</div>
+        <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+          <p className="text-lg font-medium">Failed to load appointment</p>
+          <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+        </div>
       </div>
     );
   }

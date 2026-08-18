@@ -1,7 +1,8 @@
 import { useState } from "react";
-import { Search } from "lucide-react";
+import { Search, Package } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/ui/empty-state";
 import { useStockMovements } from "../hooks/use-inventory";
 import type { StockMovement } from "@/types/product";
 
@@ -10,7 +11,7 @@ export default function InventoryPage() {
   const { data: movements, isLoading, error } = useStockMovements();
 
   const filteredMovements = movements?.filter((movement) =>
-    movement.reference_type?.toLowerCase().includes(search.toLowerCase()),
+    movement.reference_type?.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = [
@@ -33,23 +34,30 @@ export default function InventoryPage() {
     {
       header: "Reference",
       accessorKey: "reference_type" as const,
-      cell: ({ original }: { original: StockMovement }) =>
-        original.reference_type || "-",
+      cell: ({ original }: { original: StockMovement }) => original.reference_type || "-",
     },
     {
       header: "Notes",
       accessorKey: "notes" as const,
-      cell: ({ original }: { original: StockMovement }) =>
-        original.notes || "-",
+      cell: ({ original }: { original: StockMovement }) => original.notes || "-",
     },
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading inventory...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading inventory</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load inventory</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -78,6 +86,13 @@ export default function InventoryPage() {
         columns={columns}
         data={filteredMovements || []}
         searchKey="reference_type"
+        emptyState={
+          <EmptyState
+            icon={<Package className="h-12 w-12" />}
+            title="No stock movements found"
+            description="Stock movements will appear here when transactions occur."
+          />
+        }
       />
     </div>
   );

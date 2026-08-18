@@ -1,10 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-import type {
-  Customer,
-  CreateCustomerInput,
-  UpdateCustomerInput,
-} from "@/types/customer";
+import { fetchPaginated } from "@/hooks/use-paginated-query";
+import type { Customer, CreateCustomerInput, UpdateCustomerInput } from "@/types/customer";
 import * as customerService from "../services/customer.service";
 
 interface UseCreateCustomerOptions {
@@ -19,19 +16,16 @@ interface UseDeleteCustomerOptions {
   callerUserId?: string;
 }
 
-export function useCustomers() {
+export function useCustomers(page = 1, limit = 20) {
   return useQuery({
-    queryKey: ["customers"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("customers")
-        .select("*")
-        .is("deleted_at", null)
-        .order("name");
-
-      if (error) throw error;
-      return data as Customer[];
-    },
+    queryKey: ["customers", page, limit],
+    queryFn: () =>
+      fetchPaginated<Customer>("customers", {
+        page,
+        limit,
+        filter: { deleted_at: null },
+        orderBy: { column: "name", ascending: true },
+      }),
   });
 }
 
@@ -39,11 +33,7 @@ export function useCustomer(id: string) {
   return useQuery({
     queryKey: ["customers", id],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from("customers")
-        .select("*")
-        .eq("id", id)
-        .single();
+      const { data, error } = await supabase.from("customers").select("*").eq("id", id).single();
 
       if (error) throw error;
       return data as Customer;
@@ -74,13 +64,7 @@ export function useUpdateCustomer(options?: UseUpdateCustomerOptions) {
   const callerUserId = options?.callerUserId;
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      input,
-    }: {
-      id: string;
-      input: UpdateCustomerInput;
-    }) => {
+    mutationFn: async ({ id, input }: { id: string; input: UpdateCustomerInput }) => {
       if (!callerUserId) {
         throw new Error("callerUserId is required");
       }
@@ -126,12 +110,7 @@ export function useConvertGuest(options?: { callerUserId?: string }) {
       if (!callerUserId) {
         throw new Error("callerUserId is required");
       }
-      return customerService.convertGuest(
-        customerId,
-        username,
-        pin,
-        callerUserId,
-      );
+      return customerService.convertGuest(customerId, username, pin, callerUserId);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });

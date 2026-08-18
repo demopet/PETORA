@@ -219,8 +219,10 @@ export default function DashboardPage() {
                       <p className="text-xs text-slate-500">SKU: {product.sku || product.id}</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-danger-600">{product.stock} left</p>
-                      <p className="text-xs text-slate-500">Min: {product.min_stock || 5}</p>
+                      <p className="text-sm font-semibold text-danger-600">
+                        {product.stock_quantity} left
+                      </p>
+                      <p className="text-xs text-slate-500">Min: {product.stock_minimum || 5}</p>
                     </div>
                   </div>
                 ))}

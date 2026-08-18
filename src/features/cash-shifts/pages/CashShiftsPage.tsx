@@ -12,7 +12,7 @@ export default function CashShiftsPage() {
   const { data: shifts, isLoading, error } = useCashShifts();
 
   const filteredShifts = shifts?.filter((shift) =>
-    shift.id.toLowerCase().includes(search.toLowerCase()),
+    shift.id.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = [
@@ -20,18 +20,14 @@ export default function CashShiftsPage() {
       header: "Open Time",
       accessorKey: "open_time" as const,
       cell: ({ original }: { original: CashShift }) => (
-        <div className="text-sm">
-          {new Date(original.open_time).toLocaleString("id-ID")}
-        </div>
+        <div className="text-sm">{new Date(original.open_time).toLocaleString("id-ID")}</div>
       ),
     },
     {
       header: "Close Time",
       accessorKey: "close_time" as const,
       cell: ({ original }: { original: CashShift }) =>
-        original.close_time
-          ? new Date(original.close_time).toLocaleString("id-ID")
-          : "-",
+        original.close_time ? new Date(original.close_time).toLocaleString("id-ID") : "-",
     },
     {
       header: "Opening Cash",
@@ -83,11 +79,20 @@ export default function CashShiftsPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading cash shifts...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading cash shifts</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load cash shifts</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -95,9 +100,7 @@ export default function CashShiftsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Cash Shifts</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredShifts?.length || 0} shifts
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredShifts?.length || 0} shifts</p>
         </div>
         <Button>
           <Plus className="h-4 w-4" />

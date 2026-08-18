@@ -47,14 +47,13 @@ BEGIN
   SET failed_login_attempts = 0,
       locked_until = NULL,
       last_login_at = v_now,
+      current_session_token = v_session_token,
       updated_at = v_now
   WHERE id = v_user.id;
 
-  v_session_token := encode(gen_random_bytes(32), 'hex');
-
   INSERT INTO audit_logs (user_id, action, entity_type, entity_id, new_values)
   VALUES (v_user.id, 'LOGIN', 'users', v_user.id,
-          jsonb_build_object('username', v_user.username, 'role', v_user.role, 'login_at', v_now));
+          jsonb_build_object('username', v_user.username, 'role', v_user.role, 'login_at', v_now, 'session_token', v_session_token));
 
   RETURN jsonb_build_object(
     'user', jsonb_build_object(

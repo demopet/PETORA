@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Search, Trash2, Plus, Minus, Clock, X, ShoppingCart, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,10 +15,10 @@ import { Select, SelectOption } from "@/components/ui/select";
 import { usePOS, type CartItem } from "../hooks/use-pos";
 import { useCustomers, useCreateCustomer } from "@/features/customers/hooks/use-customers";
 import { usePromotions } from "@/features/promotions/hooks/use-promotions";
+import { useProducts } from "@/features/products/hooks/use-products";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import { createInvoice } from "@/features/invoices/services/invoice.service";
 import { toast } from "sonner";
-import type { Product } from "@/types";
 import { z } from "zod";
 
 export default function POSPage() {
@@ -57,20 +56,7 @@ export default function POSPage() {
     removeHeldTransaction,
   } = usePOS();
 
-  const { data: products } = useQuery({
-    queryKey: ["products"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("products")
-        .select("*")
-        .is("deleted_at", null)
-        .eq("status", "ACTIVE");
-
-      if (error) throw error;
-      return data as Product[];
-    },
-  });
-
+  const { data: products = [] } = useProducts();
   const { data: customers } = useCustomers();
   const { data: promotions } = usePromotions();
   const queryClient = useQueryClient();
@@ -121,7 +107,7 @@ export default function POSPage() {
     },
   });
 
-  const filteredProducts = products?.filter(
+  const filteredProducts = products.filter(
     (product) =>
       product.status === "ACTIVE" &&
       product.deleted_at === null &&

@@ -30,6 +30,8 @@
     "commitlint": "commitlint --from=HEAD~1 --to=HEAD"
   },
   "dependencies": {
+    "@sentry/react": "^10.70.0",
+    "@sentry/tracing": "^7.120.4",
     "@supabase/supabase-js": "^2.39.0",
     "@tailwindcss/vite": "^4.1.8",
     "@tanstack/react-query": "^5.90.5",

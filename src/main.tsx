@@ -5,8 +5,11 @@ import { Toaster } from "sonner";
 import { AuthProvider } from "@/features/auth/context/AuthContext";
 import { ThemeProvider } from "@/app/providers/theme-provider";
 import { QueryProvider } from "@/app/providers/query-provider";
+import { initSentry } from "@/lib/sentry";
 import App from "./App.tsx";
 import "./index.css";
+
+initSentry();
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

@@ -49,7 +49,7 @@ export function UserForm({ open, onOpenChange, onSubmit, isLoading }: UserFormPr
     if (!pin) {
       newErrors.pin = "PIN is required";
     } else if (!/^\d{6}$/.test(pin)) {
-      newErrors.pin = "PIN must be exactly 6 digits";
+      newErrors.pin = "PIN must be exactly 8 digits";
     }
 
     setErrors(newErrors);
@@ -121,7 +121,7 @@ export function UserForm({ open, onOpenChange, onSubmit, isLoading }: UserFormPr
               inputMode="numeric"
               value={pin}
               onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
-              placeholder="6 digit angka"
+              placeholder="8 digit angka"
               error={errors.pin}
               maxLength={6}
             />

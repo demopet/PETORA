@@ -75,11 +75,20 @@ export default function PromotionsPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading promotions...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading promotions</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load promotions</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (

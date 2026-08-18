@@ -44,7 +44,10 @@ export default function PetDetailPage() {
             Back to Pets
           </Button>
         </div>
-        <div className="text-danger-500">Error loading pet details</div>
+        <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+          <p className="text-lg font-medium">Failed to load pet details</p>
+          <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+        </div>
       </div>
     );
   }

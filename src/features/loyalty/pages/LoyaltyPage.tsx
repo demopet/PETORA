@@ -12,37 +12,28 @@ export default function LoyaltyPage() {
   const { data: members, isLoading, error } = useLoyaltyMembers();
 
   const filteredMembers = members?.filter((member) =>
-    member.customer_id.toLowerCase().includes(search.toLowerCase()),
+    member.customer_id.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = [
     {
       header: "Member ID",
       accessorKey: "customer_id" as const,
-      cell: ({
-        original,
-      }: {
-        original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig };
-      }) => (
+      cell: ({ original }: { original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig } }) => (
         <div className="font-medium text-slate-900">{original.customer_id}</div>
       ),
     },
     {
       header: "Tier",
       accessorKey: "tier_id" as const,
-      cell: ({
-        original,
-      }: {
-        original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig };
-      }) => original.loyalty_tiers?.tier_name || "-",
+      cell: ({ original }: { original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig } }) =>
+        original.loyalty_tiers?.tier_name || "-",
     },
     {
       header: "Total Points",
       accessorKey: "total_points" as const,
       cell: ({ original }: { original: LoyaltyMember }) => (
-        <div className="font-medium text-primary-600">
-          {original.total_points}
-        </div>
+        <div className="font-medium text-primary-600">{original.total_points}</div>
       ),
     },
     {
@@ -55,11 +46,20 @@ export default function LoyaltyPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading loyalty members...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading loyalty members</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load loyalty members</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -67,9 +67,7 @@ export default function LoyaltyPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Loyalty Program</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredMembers?.length || 0} members
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredMembers?.length || 0} members</p>
         </div>
         <Button>
           <Plus className="h-4 w-4" />

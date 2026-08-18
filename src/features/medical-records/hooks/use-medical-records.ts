@@ -1,9 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-import type {
-  MedicalRecord,
-  CreateMedicalRecordInput,
-} from "@/types/medical-record";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import type { MedicalRecord, CreateMedicalRecordInput } from "@/types/medical-record";
 import {
   createMedicalRecord,
   updateMedicalRecord,
@@ -42,19 +40,13 @@ export function useMedicalRecord(id: string) {
   });
 }
 
-async function getCurrentUserId(): Promise<string | null> {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user?.id ?? null;
-}
-
 export function useCreateMedicalRecord() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (input: CreateMedicalRecordInput) => {
-      const callerUserId = (await getCurrentUserId()) ?? "";
+      const callerUserId = user?.id ?? "";
       return createMedicalRecord(input, callerUserId);
     },
     onSuccess: () => {
@@ -65,16 +57,11 @@ export function useCreateMedicalRecord() {
 
 export function useUpdateMedicalRecord() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
-    mutationFn: async ({
-      id,
-      input,
-    }: {
-      id: string;
-      input: Partial<CreateMedicalRecordInput>;
-    }) => {
-      const callerUserId = (await getCurrentUserId()) ?? "";
+    mutationFn: async ({ id, input }: { id: string; input: Partial<CreateMedicalRecordInput> }) => {
+      const callerUserId = user?.id ?? "";
       return updateMedicalRecord(id, input, callerUserId);
     },
     onSuccess: () => {
@@ -85,10 +72,11 @@ export function useUpdateMedicalRecord() {
 
 export function useDeleteMedicalRecord() {
   const queryClient = useQueryClient();
+  const { user } = useAuth();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const callerUserId = (await getCurrentUserId()) ?? "";
+      const callerUserId = user?.id ?? "";
       return deleteMedicalRecord(id, callerUserId);
     },
     onSuccess: () => {

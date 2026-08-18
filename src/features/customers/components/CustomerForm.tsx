@@ -43,12 +43,7 @@ interface CustomerFormProps {
   };
 }
 
-export function CustomerForm({
-  open,
-  onOpenChange,
-  onSubmit,
-  initialData,
-}: CustomerFormProps) {
+export function CustomerForm({ open, onOpenChange, onSubmit, initialData }: CustomerFormProps) {
   const [formData, setFormData] = React.useState({
     name: initialData?.name || "",
     phone: initialData?.phone || "",
@@ -91,17 +86,13 @@ export function CustomerForm({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>
-            {initialData ? "Edit Customer" : "Add Customer"}
-          </DialogTitle>
+          <DialogTitle>{initialData ? "Edit Customer" : "Add Customer"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <FormField label="Full Name" required>
             <Input
               value={formData.name}
-              onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="Enter customer name"
               required
             />
@@ -110,9 +101,7 @@ export function CustomerForm({
           <FormField label="Phone">
             <Input
               value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
               placeholder="Enter phone number"
             />
           </FormField>
@@ -121,9 +110,7 @@ export function CustomerForm({
             <Input
               type="email"
               value={formData.email}
-              onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               placeholder="Enter email address"
             />
           </FormField>
@@ -131,9 +118,7 @@ export function CustomerForm({
           <FormField label="Address">
             <Textarea
               value={formData.address}
-              onChange={(e) =>
-                setFormData({ ...formData, address: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
               placeholder="Enter address"
               rows={3}
             />
@@ -142,9 +127,7 @@ export function CustomerForm({
           <FormField label="Emergency Contact">
             <Input
               value={formData.emergency_contact}
-              onChange={(e) =>
-                setFormData({ ...formData, emergency_contact: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, emergency_contact: e.target.value })}
               placeholder="Enter emergency contact"
             />
           </FormField>
@@ -152,9 +135,7 @@ export function CustomerForm({
           <FormField label="Notes">
             <Textarea
               value={formData.notes}
-              onChange={(e) =>
-                setFormData({ ...formData, notes: e.target.value })
-              }
+              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               placeholder="Enter notes"
               rows={3}
             />
@@ -165,9 +146,7 @@ export function CustomerForm({
               id="create-account"
               type="checkbox"
               checked={formData.create_account}
-              onChange={(e) =>
-                setFormData({ ...formData, create_account: e.target.checked })
-              }
+              onChange={(e) => setFormData({ ...formData, create_account: e.target.checked })}
               className="h-4 w-4 rounded border-slate-300"
             />
             <label htmlFor="create-account" className="text-sm text-slate-700">
@@ -180,9 +159,7 @@ export function CustomerForm({
               <FormField label="Username" required>
                 <Input
                   value={formData.username}
-                  onChange={(e) =>
-                    setFormData({ ...formData, username: e.target.value })
-                  }
+                  onChange={(e) => setFormData({ ...formData, username: e.target.value })}
                   placeholder="Enter username"
                   required={formData.create_account}
                 />
@@ -196,10 +173,10 @@ export function CustomerForm({
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      pin: e.target.value.replace(/\D/g, "").slice(0, 6),
+                      pin: e.target.value.replace(/\D/g, "").slice(0, 8),
                     })
                   }
-                  placeholder="Enter 6-digit PIN"
+                  placeholder="Enter 8-digit PIN"
                   required={formData.create_account}
                   maxLength={6}
                 />
@@ -208,11 +185,7 @@ export function CustomerForm({
           )}
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit">{initialData ? "Update" : "Create"}</Button>

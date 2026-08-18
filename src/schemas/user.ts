@@ -1,17 +1,11 @@
 import { z } from "zod";
 import { uuidSchema } from "./base";
 
-export const userRoleSchema = z.enum([
-  "OWNER",
-  "ADMIN",
-  "DOKTER",
-  "KASIR",
-  "CUSTOMER",
-]);
+export const userRoleSchema = z.enum(["OWNER", "ADMIN", "DOKTER", "KASIR", "CUSTOMER"]);
 
 export const loginCredentialsSchema = z.object({
   username: z.string().min(3).max(50),
-  pin: z.string().length(6).regex(/^\d+$/),
+  pin: z.string().length(8).regex(/^\d+$/),
 });
 
 export const createUserSchema = z.object({
@@ -20,15 +14,15 @@ export const createUserSchema = z.object({
     .min(3)
     .max(50)
     .regex(/^[a-z0-9._]+$/),
-  pin: z.string().length(6).regex(/^\d+$/),
+  pin: z.string().length(8).regex(/^\d+$/),
   role: userRoleSchema,
   full_name: z.string().min(1).max(100),
   customer_id: uuidSchema.nullable().optional(),
 });
 
 export const updatePinSchema = z.object({
-  old_pin: z.string().length(6).regex(/^\d+$/),
-  new_pin: z.string().length(6).regex(/^\d+$/),
+  old_pin: z.string().length(8).regex(/^\d+$/),
+  new_pin: z.string().length(8).regex(/^\d+$/),
 });
 
 export type LoginCredentialsInput = z.infer<typeof loginCredentialsSchema>;

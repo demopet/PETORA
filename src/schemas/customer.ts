@@ -14,7 +14,7 @@ export const createCustomerSchema = z.object({
   tags: z.array(customerTagSchema).default([]),
   create_account: z.boolean().default(false),
   username: z.string().min(3).max(50).optional(),
-  pin: z.string().length(6).regex(/^\d+$/).optional(),
+  pin: z.string().length(8).regex(/^\d+$/).optional(),
 });
 
 export const updateCustomerSchema = createCustomerSchema.partial().omit({

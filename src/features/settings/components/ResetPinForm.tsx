@@ -36,7 +36,7 @@ export function ResetPinForm({
     if (!newPin) {
       newErrors.newPin = "PIN baru is required";
     } else if (!/^\d{6}$/.test(newPin)) {
-      newErrors.newPin = "PIN must be exactly 6 digits";
+      newErrors.newPin = "PIN must be exactly 8 digits";
     }
 
     if (!confirmPin) {
@@ -79,10 +79,8 @@ export function ResetPinForm({
               type="text"
               inputMode="numeric"
               value={newPin}
-              onChange={(e) =>
-                setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))
-              }
-              placeholder="6 digit angka"
+              onChange={(e) => setNewPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="8 digit angka"
               error={errors.newPin}
               maxLength={6}
             />
@@ -93,21 +91,15 @@ export function ResetPinForm({
               type="text"
               inputMode="numeric"
               value={confirmPin}
-              onChange={(e) =>
-                setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))
-              }
-              placeholder="Ulangi 6 digit angka"
+              onChange={(e) => setConfirmPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
+              placeholder="Ulangi 8 digit angka"
               error={errors.confirmPin}
               maxLength={6}
             />
           </FormField>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Batal
             </Button>
             <Button type="submit" disabled={isLoading}>

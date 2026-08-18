@@ -15,7 +15,7 @@ export default function InvoicesPage() {
   const filteredInvoices = invoices?.filter(
     (inv) =>
       inv.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
-      inv.customer_id?.toLowerCase().includes(search.toLowerCase()),
+      inv.customer_id?.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = [
@@ -23,9 +23,7 @@ export default function InvoicesPage() {
       header: "Invoice #",
       accessorKey: "invoice_number" as const,
       cell: ({ original }: { original: Invoice }) => (
-        <div className="font-medium text-slate-900">
-          {original.invoice_number}
-        </div>
+        <div className="font-medium text-slate-900">{original.invoice_number}</div>
       ),
     },
     {
@@ -48,9 +46,7 @@ export default function InvoicesPage() {
     {
       header: "Status",
       accessorKey: "status" as const,
-      cell: ({ original }: { original: Invoice }) => (
-        <StatusBadge status={original.status} />
-      ),
+      cell: ({ original }: { original: Invoice }) => <StatusBadge status={original.status} />,
     },
     {
       header: "Date",
@@ -64,11 +60,20 @@ export default function InvoicesPage() {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading invoices...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading invoices</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load invoices</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -76,9 +81,7 @@ export default function InvoicesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Invoices</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredInvoices?.length || 0} invoices
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredInvoices?.length || 0} invoices</p>
         </div>
         <Button>
           <Plus className="h-4 w-4" />

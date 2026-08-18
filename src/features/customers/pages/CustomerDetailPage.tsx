@@ -398,12 +398,12 @@ export default function CustomerDetailPage() {
                 placeholder="Enter username for new account"
               />
             </FormField>
-            <FormField label="PIN (6 digits, optional)">
+            <FormField label="PIN (8 digits, optional)">
               <Input
                 type="password"
                 value={convertPin}
                 onChange={(e) => setConvertPin(e.target.value)}
-                placeholder="Enter 6-digit PIN"
+                placeholder="Enter 8-digit PIN"
                 maxLength={6}
               />
             </FormField>

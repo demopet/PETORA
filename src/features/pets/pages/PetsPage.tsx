@@ -6,11 +6,13 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectOption } from "@/components/ui/select";
+import { ConfirmDialog } from "@/components/feedback/confirm-dialog";
 import { PetForm } from "../components/PetForm";
 import { usePets, useCreatePet, useUpdatePet, useDeletePet } from "../hooks/use-pets";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import type { Pet } from "@/types/pet";
+import { toast } from "sonner";
 
 interface PetsPageProps {
   customerId?: string;
@@ -28,6 +30,8 @@ export default function PetsPage({ customerId }: PetsPageProps) {
   const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deletingPetId, setDeletingPetId] = useState<string | null>(null);
   const { data: pets, isLoading, error } = usePets(customerId);
   const { data: customers } = useCustomers();
   const createMutation = useCreatePet({ callerUserId: user?.id });
@@ -73,9 +77,21 @@ export default function PetsPage({ customerId }: PetsPageProps) {
     }
   }, [page, totalPages]);
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this pet?")) {
-      await deleteMutation.mutateAsync(id);
+  const handleDeleteClick = (id: string) => {
+    setDeletingPetId(id);
+    setDeleteOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!deletingPetId) return;
+    try {
+      await deleteMutation.mutateAsync(deletingPetId);
+      toast.success("Pet deleted successfully");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete pet");
+    } finally {
+      setDeleteOpen(false);
+      setDeletingPetId(null);
     }
   };
 
@@ -122,7 +138,7 @@ export default function PetsPage({ customerId }: PetsPageProps) {
           <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleDelete(original.id)}>
+          <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(original.id)}>
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>
         </div>
@@ -131,11 +147,20 @@ export default function PetsPage({ customerId }: PetsPageProps) {
   ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading pets...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading pets</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-danger-500">
+        <p className="text-lg font-medium">Failed to load pets</p>
+        <p className="mt-1 text-sm text-slate-500">Please try again later</p>
+      </div>
+    );
   }
 
   return (
@@ -266,7 +291,7 @@ export default function PetsPage({ customerId }: PetsPageProps) {
                   <Button variant="ghost" size="icon" onClick={() => handleEdit(pet)}>
                     <Edit className="h-4 w-4" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={() => handleDelete(pet.id)}>
+                  <Button variant="ghost" size="icon" onClick={() => handleDeleteClick(pet.id)}>
                     <Trash2 className="h-4 w-4 text-danger-500" />
                   </Button>
                 </div>
@@ -345,6 +370,16 @@ export default function PetsPage({ customerId }: PetsPageProps) {
               }
             : undefined
         }
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onOpenChange={setDeleteOpen}
+        title="Delete Pet"
+        description="Are you sure you want to delete this pet? This action cannot be undone."
+        confirmLabel="Delete"
+        variant="destructive"
+        onConfirm={handleDelete}
       />
     </div>
   );

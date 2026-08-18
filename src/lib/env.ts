@@ -14,6 +14,7 @@ export const envSchema = z.object({
     .string()
     .default("false")
     .transform((v) => v === "true"),
+  VITE_SENTRY_DSN: z.string().url().optional(),
 });
 
 export const env = envSchema.parse(import.meta.env);
