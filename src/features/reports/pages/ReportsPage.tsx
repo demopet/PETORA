@@ -12,6 +12,24 @@ export default function ReportsPage() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
 
+  const { data: customers } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('customers').select('id').is('deleted_at', null)
+      if (error) throw error
+      return data as { id: string }[]
+    },
+  })
+
+  const { data: pets } = useQuery({
+    queryKey: ['pets'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('pets').select('id').is('deleted_at', null)
+      if (error) throw error
+      return data as { id: string }[]
+    },
+  })
+
   const { data: revenue } = useQuery({
     queryKey: ['reports', 'revenue', startDate, endDate],
     queryFn: async () => {
@@ -70,12 +88,12 @@ export default function ReportsPage() {
         />
         <StatCard
           title="Customers"
-          value="0"
+          value={String(customers?.length || 0)}
           icon={<Users className="h-6 w-6" />}
         />
         <StatCard
           title="Pets"
-          value="0"
+          value={String(pets?.length || 0)}
           icon={<PawPrint className="h-6 w-6" />}
         />
       </div>
