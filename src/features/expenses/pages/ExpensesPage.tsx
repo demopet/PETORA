@@ -5,28 +5,30 @@ import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import { useExpenses } from "../hooks/use-expenses";
 import { useApproveExpense } from "../hooks/use-expenses";
 import { useRejectExpense } from "../hooks/use-expenses";
 import type { Expense } from "@/types/expense";
 
 export default function ExpensesPage() {
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const { data: expenses, isLoading, error } = useExpenses();
   const approveMutation = useApproveExpense();
   const rejectMutation = useRejectExpense();
 
   const filteredExpenses = expenses?.filter((expense) =>
-    expense.description?.toLowerCase().includes(search.toLowerCase()),
+    expense.description?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleApprove = async (id: string) => {
-    await approveMutation.mutateAsync(id);
+    await approveMutation.mutateAsync({ id, callerUserId: user?.id || "" });
   };
 
   const handleReject = async (id: string) => {
     if (confirm("Are you sure you want to reject this expense?")) {
-      await rejectMutation.mutateAsync(id);
+      await rejectMutation.mutateAsync({ id, callerUserId: user?.id || "" });
     }
   };
 
@@ -38,8 +40,7 @@ export default function ExpensesPage() {
     {
       header: "Description",
       accessorKey: "description" as const,
-      cell: ({ original }: { original: Expense }) =>
-        original.description || "-",
+      cell: ({ original }: { original: Expense }) => original.description || "-",
     },
     {
       header: "Amount",
@@ -57,9 +58,7 @@ export default function ExpensesPage() {
     {
       header: "Status",
       accessorKey: "status" as const,
-      cell: ({ original }: { original: Expense }) => (
-        <StatusBadge status={original.status} />
-      ),
+      cell: ({ original }: { original: Expense }) => <StatusBadge status={original.status} />,
     },
     {
       header: "Actions",
@@ -68,18 +67,10 @@ export default function ExpensesPage() {
         <div className="flex items-center gap-2">
           {original.status === "PENDING" && (
             <>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleApprove(original.id)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => handleApprove(original.id)}>
                 Approve
               </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleReject(original.id)}
-              >
+              <Button variant="ghost" size="sm" onClick={() => handleReject(original.id)}>
                 Reject
               </Button>
             </>
@@ -102,9 +93,7 @@ export default function ExpensesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Expenses</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredExpenses?.length || 0} expenses
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredExpenses?.length || 0} expenses</p>
         </div>
         <Button>
           <Plus className="h-4 w-4" />

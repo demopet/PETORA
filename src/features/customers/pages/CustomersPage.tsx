@@ -1,19 +1,12 @@
-import { useState } from "react";
-import {
-  Plus,
-  Search,
-  Trash2,
-  Edit,
-  Eye,
-  UserPlus,
-  UserCheck,
-} from "lucide-react";
+import { useState, useMemo } from "react";
+import { Plus, Search, Trash2, Edit, Eye, UserPlus, UserCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select, SelectOption } from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -31,19 +24,28 @@ import {
   useConvertGuest,
 } from "../hooks/use-customers";
 import { useAuth } from "@/features/auth/context/AuthContext";
-import type { Customer } from "@/types/customer";
+import type { Customer, CustomerTag } from "@/types/customer";
 import { toast } from "sonner";
+
+const ITEMS_PER_PAGE = 10;
+const TAG_OPTIONS: Array<{ value: string; label: string }> = [
+  { value: "all", label: "All Tags" },
+  { value: "VIP", label: "VIP" },
+  { value: "REGULAR", label: "Regular" },
+  { value: "NEW", label: "New" },
+  { value: "BLACKLIST", label: "Blacklist" },
+];
 
 export default function CustomersPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [search, setSearch] = useState("");
+  const [tagFilter, setTagFilter] = useState("all");
+  const [page, setPage] = useState(1);
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
   const [convertOpen, setConvertOpen] = useState(false);
-  const [convertingCustomer, setConvertingCustomer] = useState<Customer | null>(
-    null,
-  );
+  const [convertingCustomer, setConvertingCustomer] = useState<Customer | null>(null);
   const [convertUsername, setConvertUsername] = useState("");
   const [convertPin, setConvertPin] = useState("");
   const { data: customers, isLoading, error } = useCustomers();
@@ -52,11 +54,37 @@ export default function CustomersPage() {
   const deleteMutation = useDeleteCustomer({ callerUserId: user?.id });
   const convertMutation = useConvertGuest({ callerUserId: user?.id });
 
-  const filteredCustomers = customers?.filter(
-    (customer) =>
-      customer.name.toLowerCase().includes(search.toLowerCase()) ||
-      customer.phone?.toLowerCase().includes(search.toLowerCase()),
+  const filteredCustomers = useMemo(() => {
+    let result = customers || [];
+
+    if (search) {
+      const query = search.toLowerCase();
+      result = result.filter(
+        (customer) =>
+          customer.name.toLowerCase().includes(query) ||
+          customer.phone?.toLowerCase().includes(query) ||
+          customer.email?.toLowerCase().includes(query)
+      );
+    }
+
+    if (tagFilter !== "all") {
+      result = result.filter((customer) => customer.tags.includes(tagFilter as CustomerTag));
+    }
+
+    return result;
+  }, [customers, search, tagFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredCustomers.length / ITEMS_PER_PAGE));
+  const paginatedCustomers = filteredCustomers.slice(
+    (page - 1) * ITEMS_PER_PAGE,
+    page * ITEMS_PER_PAGE
   );
+
+  useMemo(() => {
+    if (page > totalPages) {
+      setPage(totalPages);
+    }
+  }, [page, totalPages]);
 
   const handleDelete = async (id: string) => {
     if (confirm("Are you sure you want to delete this customer?")) {
@@ -102,9 +130,7 @@ export default function CustomersPage() {
       setConvertUsername("");
       setConvertPin("");
     } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to convert customer",
-      );
+      toast.error(err instanceof Error ? err.message : "Failed to convert customer");
     }
   };
 
@@ -161,18 +187,10 @@ export default function CustomersPage() {
               <UserCheck className="h-4 w-4 text-green-600" />
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleEdit(original)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDelete(original.id)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => handleDelete(original.id)}>
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>
         </div>
@@ -193,9 +211,7 @@ export default function CustomersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Customers</h1>
-          <p className="mt-1 text-sm text-slate-500">
-            {filteredCustomers?.length || 0} customers
-          </p>
+          <p className="mt-1 text-sm text-slate-500">{filteredCustomers.length} customers</p>
         </div>
         <Button
           onClick={() => {
@@ -215,15 +231,32 @@ export default function CustomersPage() {
             type="text"
             placeholder="Search customers..."
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setPage(1);
+            }}
             className="pl-9"
           />
         </div>
+        <Select
+          value={tagFilter}
+          onValueChange={(value) => {
+            setTagFilter(value);
+            setPage(1);
+          }}
+          className="w-40"
+        >
+          {TAG_OPTIONS.map((option) => (
+            <SelectOption key={option.value} value={option.value}>
+              {option.label}
+            </SelectOption>
+          ))}
+        </Select>
       </div>
 
       <DataTable
         columns={columns}
-        data={filteredCustomers || []}
+        data={paginatedCustomers}
         searchKey="name"
         emptyState={
           <EmptyState
@@ -244,6 +277,32 @@ export default function CustomersPage() {
           />
         }
       />
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-slate-500">
+            Page {page} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
 
       <CustomerForm
         open={formOpen}
@@ -274,8 +333,7 @@ export default function CustomersPage() {
                 phone: editingCustomer.phone ?? undefined,
                 email: editingCustomer.email ?? undefined,
                 address: editingCustomer.address ?? undefined,
-                emergency_contact:
-                  editingCustomer.emergency_contact ?? undefined,
+                emergency_contact: editingCustomer.emergency_contact ?? undefined,
                 notes: editingCustomer.notes ?? undefined,
                 is_guest: editingCustomer.is_guest,
                 tags: editingCustomer.tags,
@@ -291,8 +349,8 @@ export default function CustomersPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <p className="text-sm text-slate-600">
-              Converting <strong>{convertingCustomer?.name}</strong> from guest
-              to registered. You can optionally create a user account for them.
+              Converting <strong>{convertingCustomer?.name}</strong> from guest to registered. You
+              can optionally create a user account for them.
             </p>
             <FormField label="Username (optional)">
               <Input

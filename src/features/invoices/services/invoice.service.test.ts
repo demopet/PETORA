@@ -3,9 +3,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 const { mockRpc, mockFrom, mockAuthGetUser } = vi.hoisted(() => ({
   mockRpc: vi.fn(),
   mockFrom: vi.fn(),
-  mockAuthGetUser: vi
-    .fn()
-    .mockResolvedValue({ data: { user: { id: "user-1" } } }),
+  mockAuthGetUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }),
 }));
 
 vi.mock("@/lib/supabase/client", () => ({
@@ -76,7 +74,7 @@ describe("invoice.service", () => {
             },
           ],
         },
-        "user-1",
+        "user-1"
       );
 
       expect(mockRpc).toHaveBeenCalledWith("fn_create_invoice", {
@@ -124,8 +122,8 @@ describe("invoice.service", () => {
               },
             ],
           },
-          "user-1",
-        ),
+          "user-1"
+        )
       ).rejects.toThrow(AppError);
     });
 
@@ -152,7 +150,7 @@ describe("invoice.service", () => {
               },
             ],
           },
-          "user-1",
+          "user-1"
         );
         expect.fail("Should have thrown");
       } catch (err) {
@@ -167,24 +165,24 @@ describe("invoice.service", () => {
       mockRpc.mockResolvedValueOnce({
         data: {
           payment: { id: "payment-1" },
-          invoice: { id: "invoice-1", status: "PAID" },
+          invoice: { id: VALID_UUID, status: "PAID" },
         },
         error: null,
       } as any);
 
       const result = await recordPayment(
-        "invoice-1",
+        VALID_UUID,
         {
-          invoice_id: "invoice-1",
+          invoice_id: VALID_UUID,
           payment_method: "CASH",
           amount: 100000,
         },
-        "user-1",
+        "user-1"
       );
 
       expect(mockRpc).toHaveBeenCalledWith("fn_record_payment", {
         p_caller_id: "user-1",
-        p_invoice_id: "invoice-1",
+        p_invoice_id: VALID_UUID,
         p_payment_method: "CASH",
         p_amount: 100000,
         p_reference_number: null,
@@ -201,9 +199,9 @@ describe("invoice.service", () => {
 
       try {
         await recordPayment(
-          "invoice-1",
-          { invoice_id: "invoice-1", payment_method: "CASH", amount: 100000 },
-          "user-1",
+          VALID_UUID,
+          { invoice_id: VALID_UUID, payment_method: "CASH", amount: 100000 },
+          "user-1"
         );
         expect.fail("Should have thrown");
       } catch (err) {

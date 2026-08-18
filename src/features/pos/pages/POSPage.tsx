@@ -1,16 +1,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/lib/supabase/client";
-import {
-  Search,
-  Trash2,
-  Plus,
-  Minus,
-  Clock,
-  X,
-  ShoppingCart,
-  Tag,
-} from "lucide-react";
+import { Search, Trash2, Plus, Minus, Clock, X, ShoppingCart, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -21,10 +12,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { FormField } from "@/components/ui/form-field";
-import {
-  Select,
-  SelectOption,
-} from "@/components/ui/select";
+import { Select, SelectOption } from "@/components/ui/select";
 import { usePOS, type CartItem } from "../hooks/use-pos";
 import { useCustomers, useCreateCustomer } from "@/features/customers/hooks/use-customers";
 import { usePromotions } from "@/features/promotions/hooks/use-promotions";
@@ -115,7 +103,7 @@ export default function POSPage() {
           loyalty_points_to_redeem: state.loyaltyPointsToRedeem,
           notes: state.notes,
         },
-        user.id,
+        user.id
       );
     },
     onSuccess: () => {
@@ -138,12 +126,16 @@ export default function POSPage() {
       product.status === "ACTIVE" &&
       product.deleted_at === null &&
       (product.name.toLowerCase().includes(search.toLowerCase()) ||
-        product.sku.toLowerCase().includes(search.toLowerCase())),
+        product.sku.toLowerCase().includes(search.toLowerCase()))
   );
 
   const outOfStockProducts = filteredProducts?.filter((p) => p.stock_quantity === 0) || [];
-  const lowStockProducts = filteredProducts?.filter((p) => p.stock_quantity > 0 && p.stock_quantity <= (p.stock_minimum || 5)) || [];
-  const availableProducts = filteredProducts?.filter((p) => p.stock_quantity > (p.stock_minimum || 5)) || [];
+  const lowStockProducts =
+    filteredProducts?.filter(
+      (p) => p.stock_quantity > 0 && p.stock_quantity <= (p.stock_minimum || 5)
+    ) || [];
+  const availableProducts =
+    filteredProducts?.filter((p) => p.stock_quantity > (p.stock_minimum || 5)) || [];
 
   const appliedPromotion = promotions?.find((p) => p.id === appliedPromoId);
 
@@ -164,15 +156,17 @@ export default function POSPage() {
 
   const handleQuickCreateCustomer = () => {
     try {
-      const input = z.object({
-        name: z.string().min(1),
-        phone: z.string().optional(),
-        email: z.string().email().optional().or(z.literal("")),
-      }).parse({
-        name: quickCustomerName,
-        phone: quickCustomerPhone || undefined,
-        email: quickCustomerEmail || undefined,
-      });
+      const input = z
+        .object({
+          name: z.string().min(1),
+          phone: z.string().optional(),
+          email: z.string().email().optional().or(z.literal("")),
+        })
+        .parse({
+          name: quickCustomerName,
+          phone: quickCustomerPhone || undefined,
+          email: quickCustomerEmail || undefined,
+        });
 
       createCustomerMutation.mutate(input, {
         onSuccess: (customer) => {
@@ -189,7 +183,7 @@ export default function POSPage() {
       });
     } catch (error) {
       if (error instanceof z.ZodError) {
-        toast.error(error.errors[0]?.message || "Invalid input");
+        toast.error(error.issues[0]?.message || "Invalid input");
       }
     }
   };
@@ -229,9 +223,7 @@ export default function POSPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Point of Sale</h1>
-        <p className="mt-1 text-sm text-slate-500">
-          Process customer transactions
-        </p>
+        <p className="mt-1 text-sm text-slate-500">Process customer transactions</p>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -256,11 +248,7 @@ export default function POSPage() {
               <Clock className="h-4 w-4" />
             </Button>
             {cartCount > 0 && (
-              <Button
-                variant="outline"
-                onClick={handleHold}
-                title="Hold Transaction"
-              >
+              <Button variant="outline" onClick={handleHold} title="Hold Transaction">
                 <Clock className="h-4 w-4 mr-2" />
                 Hold
               </Button>
@@ -325,9 +313,7 @@ export default function POSPage() {
                   }`}
                 >
                   <div className="font-medium text-slate-900">{product.name}</div>
-                  <div className="mt-1 text-sm text-slate-500">
-                    SKU: {product.sku}
-                  </div>
+                  <div className="mt-1 text-sm text-slate-500">SKU: {product.sku}</div>
                   <div className="mt-2 font-semibold text-primary-600">
                     {new Intl.NumberFormat("id-ID", {
                       style: "currency",
@@ -381,9 +367,7 @@ export default function POSPage() {
 
           <div className="mt-4 space-y-3">
             {cart.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-500">
-                Cart is empty
-              </div>
+              <div className="py-8 text-center text-sm text-slate-500">Cart is empty</div>
             ) : (
               cart.map((item) => (
                 <div
@@ -391,9 +375,7 @@ export default function POSPage() {
                   className="flex items-center justify-between rounded-md border border-slate-100 p-3"
                 >
                   <div className="flex-1 min-w-0">
-                    <div className="font-medium text-slate-900 truncate">
-                      {item.product.name}
-                    </div>
+                    <div className="font-medium text-slate-900 truncate">{item.product.name}</div>
                     <div className="text-sm text-slate-500">
                       {new Intl.NumberFormat("id-ID", {
                         style: "currency",
@@ -406,9 +388,7 @@ export default function POSPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        updateQuantity(item.product.id, item.quantity - 1)
-                      }
+                      onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
                     >
                       <Minus className="h-3 w-3" />
                     </Button>
@@ -416,12 +396,8 @@ export default function POSPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() =>
-                        updateQuantity(item.product.id, item.quantity + 1)
-                      }
-                      disabled={
-                        item.quantity >= item.product.stock_quantity
-                      }
+                      onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
+                      disabled={item.quantity >= item.product.stock_quantity}
                     >
                       <Plus className="h-3 w-3" />
                     </Button>
@@ -441,7 +417,10 @@ export default function POSPage() {
           {cart.length > 0 && (
             <div className="mt-6 space-y-4">
               <div className="space-y-2">
-                <label htmlFor="customer-select" className="text-sm font-medium text-slate-700 block">
+                <label
+                  htmlFor="customer-select"
+                  className="text-sm font-medium text-slate-700 block"
+                >
                   Customer
                 </label>
                 <select
@@ -467,7 +446,6 @@ export default function POSPage() {
                   <option value="__quick_create__">+ Quick Create</option>
                 </select>
               </div>
-              </div>
 
               <div className="space-y-2">
                 <label htmlFor="promo-code" className="text-sm font-medium text-slate-700">
@@ -482,11 +460,7 @@ export default function POSPage() {
                     onChange={(e) => setPromoCode(e.target.value.toUpperCase())}
                     className="flex-1"
                   />
-                  <Button
-                    variant="outline"
-                    onClick={handleApplyPromo}
-                    disabled={!promoCode}
-                  >
+                  <Button variant="outline" onClick={handleApplyPromo} disabled={!promoCode}>
                     <Tag className="h-4 w-4 mr-2" />
                     Apply
                   </Button>
@@ -502,7 +476,7 @@ export default function POSPage() {
                       }).format(
                         appliedPromotion.promotion_type === "PERCENTAGE"
                           ? subtotal * (appliedPromotion.discount_value / 100)
-                          : appliedPromotion.discount_value,
+                          : appliedPromotion.discount_value
                       )}
                       )
                     </span>
@@ -563,9 +537,7 @@ export default function POSPage() {
               </div>
 
               <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                <span className="text-lg font-semibold text-slate-900">
-                  Subtotal
-                </span>
+                <span className="text-lg font-semibold text-slate-900">Subtotal</span>
                 <span className="text-lg font-bold text-slate-900">
                   {new Intl.NumberFormat("id-ID", {
                     style: "currency",
@@ -601,7 +573,7 @@ export default function POSPage() {
                     }).format(
                       appliedPromotion.promotion_type === "PERCENTAGE"
                         ? subtotal * (appliedPromotion.discount_value / 100)
-                        : appliedPromotion.discount_value,
+                        : appliedPromotion.discount_value
                     )}
                   </span>
                 </div>
@@ -621,25 +593,29 @@ export default function POSPage() {
               )}
 
               <div className="flex items-center justify-between border-t border-slate-200 pt-4">
-                <span className="text-lg font-semibold text-slate-900">
-                  Total
-                </span>
+                <span className="text-lg font-semibold text-slate-900">Total</span>
                 <span className="text-xl font-bold text-primary-600">
                   {new Intl.NumberFormat("id-ID", {
                     style: "currency",
                     currency: "IDR",
                     minimumFractionDigits: 0,
                   }).format(
-                    Math.max(0, subtotal - state.discountAmount - (appliedPromotion ? (appliedPromotion.promotion_type === "PERCENTAGE" ? subtotal * (appliedPromotion.discount_value / 100) : appliedPromotion.discount_value) : 0) + state.taxAmount),
+                    Math.max(
+                      0,
+                      subtotal -
+                        state.discountAmount -
+                        (appliedPromotion
+                          ? appliedPromotion.promotion_type === "PERCENTAGE"
+                            ? subtotal * (appliedPromotion.discount_value / 100)
+                            : appliedPromotion.discount_value
+                          : 0) +
+                        state.taxAmount
+                    )
                   )}
                 </span>
               </div>
 
-              <Button
-                className="w-full"
-                size="lg"
-                onClick={() => setIsCheckoutOpen(true)}
-              >
+              <Button className="w-full" size="lg" onClick={() => setIsCheckoutOpen(true)}>
                 Checkout
               </Button>
             </div>
@@ -689,7 +665,7 @@ export default function POSPage() {
                     }).format(
                       appliedPromotion.promotion_type === "PERCENTAGE"
                         ? subtotal * (appliedPromotion.discount_value / 100)
-                        : appliedPromotion.discount_value,
+                        : appliedPromotion.discount_value
                     )}
                   </span>
                 </div>
@@ -714,7 +690,17 @@ export default function POSPage() {
                     currency: "IDR",
                     minimumFractionDigits: 0,
                   }).format(
-                    Math.max(0, subtotal - state.discountAmount - (appliedPromotion ? (appliedPromotion.promotion_type === "PERCENTAGE" ? subtotal * (appliedPromotion.discount_value / 100) : appliedPromotion.discount_value) : 0) + state.taxAmount),
+                    Math.max(
+                      0,
+                      subtotal -
+                        state.discountAmount -
+                        (appliedPromotion
+                          ? appliedPromotion.promotion_type === "PERCENTAGE"
+                            ? subtotal * (appliedPromotion.discount_value / 100)
+                            : appliedPromotion.discount_value
+                          : 0) +
+                        state.taxAmount
+                    )
                   )}
                 </span>
               </div>
@@ -769,10 +755,7 @@ export default function POSPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsCheckoutOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsCheckoutOpen(false)}>
               Cancel
             </Button>
             <Button
@@ -814,10 +797,7 @@ export default function POSPage() {
             </FormField>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsQuickCustomerOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsQuickCustomerOpen(false)}>
               Cancel
             </Button>
             <Button
@@ -837,9 +817,7 @@ export default function POSPage() {
           </DialogHeader>
           <div className="space-y-3 max-h-96 overflow-y-auto">
             {heldTransactions.length === 0 ? (
-              <div className="py-8 text-center text-sm text-slate-500">
-                No held transactions
-              </div>
+              <div className="py-8 text-center text-sm text-slate-500">No held transactions</div>
             ) : (
               heldTransactions.map((held) => (
                 <div
@@ -847,9 +825,7 @@ export default function POSPage() {
                   className="flex items-center justify-between rounded-md border border-slate-100 p-4"
                 >
                   <div className="flex-1">
-                    <div className="font-medium text-slate-900">
-                      {held.cart.length} items
-                    </div>
+                    <div className="font-medium text-slate-900">{held.cart.length} items</div>
                     <div className="text-sm text-slate-500">
                       {held.customerName || "Walk-in"} |{" "}
                       {new Intl.NumberFormat("id-ID", {
@@ -858,10 +834,9 @@ export default function POSPage() {
                         minimumFractionDigits: 0,
                       }).format(
                         held.cart.reduce(
-                          (sum, item) =>
-                            sum + item.product.selling_price * item.quantity,
-                          0,
-                        ),
+                          (sum, item) => sum + item.product.selling_price * item.quantity,
+                          0
+                        )
                       )}
                     </div>
                     <div className="text-xs text-slate-400 mt-1">
@@ -869,18 +844,10 @@ export default function POSPage() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleResume(held.id)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => handleResume(held.id)}>
                       Resume
                     </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => handleRemoveHeld(held.id)}
-                    >
+                    <Button variant="ghost" size="icon" onClick={() => handleRemoveHeld(held.id)}>
                       <Trash2 className="h-4 w-4 text-danger-500" />
                     </Button>
                   </div>
@@ -889,10 +856,7 @@ export default function POSPage() {
             )}
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsHoldListOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsHoldListOpen(false)}>
               Close
             </Button>
           </DialogFooter>

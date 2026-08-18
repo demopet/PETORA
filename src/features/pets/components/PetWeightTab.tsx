@@ -4,10 +4,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
 import {
-  usePetWeightLogs,
-  useAddWeightLog,
-  useDeleteWeightLog,
-} from "../hooks/use-pet-medical";
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { usePetWeightLogs, useAddWeightLog, useDeleteWeightLog } from "../hooks/use-pet-medical";
 
 interface PetWeightTabProps {
   petId: string;
@@ -16,9 +21,7 @@ interface PetWeightTabProps {
 export default function PetWeightTab({ petId }: PetWeightTabProps) {
   const [showAddForm, setShowAddForm] = useState(false);
   const [weight, setWeight] = useState("");
-  const [recordDate, setRecordDate] = useState(
-    new Date().toISOString().split("T")[0],
-  );
+  const [recordDate, setRecordDate] = useState(new Date().toISOString().split("T")[0]);
 
   const { data: weightLogs = [] } = usePetWeightLogs(petId);
   const addMutation = useAddWeightLog();
@@ -46,8 +49,14 @@ export default function PetWeightTab({ petId }: PetWeightTabProps) {
 
   const latestWeight = weightLogs[0]?.weight_kg || 0;
   const previousWeight = weightLogs[1]?.weight_kg || 0;
-  const weightChange =
-    latestWeight && previousWeight ? latestWeight - previousWeight : 0;
+  const weightChange = latestWeight && previousWeight ? latestWeight - previousWeight : 0;
+
+  const chartData = [...weightLogs]
+    .sort((a, b) => new Date(a.recorded_at).getTime() - new Date(b.recorded_at).getTime())
+    .map((log) => ({
+      date: new Date(log.recorded_at).toLocaleDateString(),
+      weight: log.weight_kg,
+    }));
 
   return (
     <div className="space-y-6">
@@ -55,27 +64,17 @@ export default function PetWeightTab({ petId }: PetWeightTabProps) {
       {latestWeight > 0 && (
         <div className="grid grid-cols-3 gap-4 rounded-lg bg-slate-50 p-4">
           <div>
-            <p className="text-xs font-medium text-slate-500 uppercase">
-              Current Weight
-            </p>
-            <p className="mt-1 text-2xl font-bold text-slate-900">
-              {latestWeight.toFixed(2)} kg
-            </p>
+            <p className="text-xs font-medium text-slate-500 uppercase">Current Weight</p>
+            <p className="mt-1 text-2xl font-bold text-slate-900">{latestWeight.toFixed(2)} kg</p>
           </div>
           {previousWeight > 0 && (
             <>
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase">
-                  Previous Weight
-                </p>
-                <p className="mt-1 text-lg text-slate-600">
-                  {previousWeight.toFixed(2)} kg
-                </p>
+                <p className="text-xs font-medium text-slate-500 uppercase">Previous Weight</p>
+                <p className="mt-1 text-lg text-slate-600">{previousWeight.toFixed(2)} kg</p>
               </div>
               <div>
-                <p className="text-xs font-medium text-slate-500 uppercase">
-                  Change
-                </p>
+                <p className="text-xs font-medium text-slate-500 uppercase">Change</p>
                 <p
                   className={`mt-1 text-lg font-semibold ${
                     weightChange > 0 ? "text-orange-600" : "text-green-600"
@@ -87,6 +86,36 @@ export default function PetWeightTab({ petId }: PetWeightTabProps) {
               </div>
             </>
           )}
+        </div>
+      )}
+
+      {/* Weight Chart */}
+      {chartData.length > 1 && (
+        <div className="rounded-lg bg-white p-6 shadow-sm">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4">Weight Trend</h3>
+          <ResponsiveContainer width="100%" height={250}>
+            <LineChart data={chartData}>
+              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <XAxis dataKey="date" stroke="#64748b" fontSize={12} tickLine={false} />
+              <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} unit=" kg" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#ffffff",
+                  border: "1px solid #e2e8f0",
+                  borderRadius: "8px",
+                }}
+                formatter={(value) => [`${Number(value).toFixed(2)} kg`, "Weight"]}
+              />
+              <Line
+                type="monotone"
+                dataKey="weight"
+                stroke="#0f172a"
+                strokeWidth={2}
+                dot={{ fill: "#0f172a", strokeWidth: 2, r: 4 }}
+                activeDot={{ r: 6 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
         </div>
       )}
 
@@ -136,17 +165,13 @@ export default function PetWeightTab({ petId }: PetWeightTabProps) {
 
       {/* Weight History Table */}
       <div>
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">
-          Weight History
-        </h3>
+        <h3 className="text-lg font-semibold text-slate-900 mb-4">Weight History</h3>
         {weightLogs.length > 0 ? (
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
                 <tr className="border-b border-slate-200">
-                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
-                    Date
-                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">Date</th>
                   <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700">
                     Weight (kg)
                   </th>

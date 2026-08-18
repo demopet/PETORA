@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
-import { ArrowLeft, Upload } from "lucide-react";
+import { ArrowLeft, Upload, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormField } from "@/components/ui/form-field";
@@ -65,6 +65,36 @@ export default function MedicalRecordFormPage() {
     }
   }, [record]);
 
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+
+    const newAttachments: string[] = [];
+    for (const file of Array.from(files)) {
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      newAttachments.push(dataUrl);
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      attachments: [...prev.attachments, ...newAttachments],
+    }));
+
+    e.target.value = "";
+  };
+
+  const handleRemoveAttachment = (index: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      attachments: prev.attachments.filter((_, i) => i !== index),
+    }));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -76,12 +106,8 @@ export default function MedicalRecordFormPage() {
           chief_complaint: formData.chief_complaint || undefined,
           history: formData.history || undefined,
           physical_exam: formData.physical_exam || undefined,
-          weight_kg: formData.weight_kg
-            ? parseFloat(formData.weight_kg)
-            : undefined,
-          temperature_c: formData.temperature_c
-            ? parseFloat(formData.temperature_c)
-            : undefined,
+          weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : undefined,
+          temperature_c: formData.temperature_c ? parseFloat(formData.temperature_c) : undefined,
           heart_rate_bpm: formData.heart_rate_bpm
             ? parseInt(formData.heart_rate_bpm, 10)
             : undefined,
@@ -103,15 +129,9 @@ export default function MedicalRecordFormPage() {
         chief_complaint: formData.chief_complaint || undefined,
         history: formData.history || undefined,
         physical_exam: formData.physical_exam || undefined,
-        weight_kg: formData.weight_kg
-          ? parseFloat(formData.weight_kg)
-          : undefined,
-        temperature_c: formData.temperature_c
-          ? parseFloat(formData.temperature_c)
-          : undefined,
-        heart_rate_bpm: formData.heart_rate_bpm
-          ? parseInt(formData.heart_rate_bpm, 10)
-          : undefined,
+        weight_kg: formData.weight_kg ? parseFloat(formData.weight_kg) : undefined,
+        temperature_c: formData.temperature_c ? parseFloat(formData.temperature_c) : undefined,
+        heart_rate_bpm: formData.heart_rate_bpm ? parseInt(formData.heart_rate_bpm, 10) : undefined,
         respiratory_rate_bpm: formData.respiratory_rate_bpm
           ? parseInt(formData.respiratory_rate_bpm, 10)
           : undefined,
@@ -132,9 +152,7 @@ export default function MedicalRecordFormPage() {
   const customer = appointment
     ? customers?.find((c) => c.id === appointment.customer_id)
     : undefined;
-  const pet = appointment
-    ? pets?.find((p) => p.id === appointment.pet_id)
-    : undefined;
+  const pet = appointment ? pets?.find((p) => p.id === appointment.pet_id) : undefined;
 
   return (
     <div className="space-y-6">
@@ -157,9 +175,7 @@ export default function MedicalRecordFormPage() {
       {/* Appointment Info (if creating from appointment) */}
       {appointment && (
         <div className="rounded-lg bg-blue-50 p-4">
-          <p className="text-sm font-semibold text-blue-900">
-            Associated Appointment
-          </p>
+          <p className="text-sm font-semibold text-blue-900">Associated Appointment</p>
           <div className="mt-3 grid grid-cols-2 gap-4 md:grid-cols-4">
             <div>
               <p className="text-xs text-blue-700">Customer</p>
@@ -173,15 +189,11 @@ export default function MedicalRecordFormPage() {
             </div>
             <div>
               <p className="text-xs text-blue-700">Date</p>
-              <p className="font-medium text-blue-900">
-                {appointment.appointment_date}
-              </p>
+              <p className="font-medium text-blue-900">{appointment.appointment_date}</p>
             </div>
             <div>
               <p className="text-xs text-blue-700">Time</p>
-              <p className="font-medium text-blue-900">
-                {appointment.appointment_time}
-              </p>
+              <p className="font-medium text-blue-900">{appointment.appointment_time}</p>
             </div>
           </div>
         </div>
@@ -191,17 +203,13 @@ export default function MedicalRecordFormPage() {
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Chief Complaint */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Chief Complaint & History
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Chief Complaint & History</h2>
 
           <div className="space-y-4">
             <FormField label="Chief Complaint">
               <Textarea
                 value={formData.chief_complaint}
-                onChange={(e) =>
-                  setFormData({ ...formData, chief_complaint: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, chief_complaint: e.target.value })}
                 placeholder="What is the main reason for this visit?"
                 rows={3}
               />
@@ -210,9 +218,7 @@ export default function MedicalRecordFormPage() {
             <FormField label="Medical History">
               <Textarea
                 value={formData.history}
-                onChange={(e) =>
-                  setFormData({ ...formData, history: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, history: e.target.value })}
                 placeholder="Relevant medical history"
                 rows={3}
               />
@@ -222,17 +228,13 @@ export default function MedicalRecordFormPage() {
 
         {/* Physical Exam */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Physical Examination
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Physical Examination</h2>
 
           <div className="space-y-4">
             <FormField label="Physical Exam Findings">
               <Textarea
                 value={formData.physical_exam}
-                onChange={(e) =>
-                  setFormData({ ...formData, physical_exam: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, physical_exam: e.target.value })}
                 placeholder="Describe physical examination findings"
                 rows={3}
               />
@@ -242,9 +244,7 @@ export default function MedicalRecordFormPage() {
 
         {/* Vital Signs */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Vital Signs
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Vital Signs</h2>
 
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             <FormField label="Weight (kg)">
@@ -252,9 +252,7 @@ export default function MedicalRecordFormPage() {
                 type="number"
                 step="0.1"
                 value={formData.weight_kg}
-                onChange={(e) =>
-                  setFormData({ ...formData, weight_kg: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, weight_kg: e.target.value })}
                 placeholder="0.0"
               />
             </FormField>
@@ -264,9 +262,7 @@ export default function MedicalRecordFormPage() {
                 type="number"
                 step="0.1"
                 value={formData.temperature_c}
-                onChange={(e) =>
-                  setFormData({ ...formData, temperature_c: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, temperature_c: e.target.value })}
                 placeholder="37.5"
               />
             </FormField>
@@ -303,17 +299,13 @@ export default function MedicalRecordFormPage() {
 
         {/* Diagnosis & Treatment */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Diagnosis & Treatment
-          </h2>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Diagnosis & Treatment</h2>
 
           <div className="space-y-4">
             <FormField label="Diagnosis">
               <Textarea
                 value={formData.diagnosis}
-                onChange={(e) =>
-                  setFormData({ ...formData, diagnosis: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, diagnosis: e.target.value })}
                 placeholder="Veterinary diagnosis"
                 rows={3}
               />
@@ -322,9 +314,7 @@ export default function MedicalRecordFormPage() {
             <FormField label="Treatment Plan">
               <Textarea
                 value={formData.treatment}
-                onChange={(e) =>
-                  setFormData({ ...formData, treatment: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, treatment: e.target.value })}
                 placeholder="Recommended treatment"
                 rows={3}
               />
@@ -333,9 +323,7 @@ export default function MedicalRecordFormPage() {
             <FormField label="Prescription">
               <Textarea
                 value={formData.prescription}
-                onChange={(e) =>
-                  setFormData({ ...formData, prescription: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, prescription: e.target.value })}
                 placeholder="Medications and dosage"
                 rows={3}
               />
@@ -353,9 +341,7 @@ export default function MedicalRecordFormPage() {
             <FormField label="Lab Results">
               <Textarea
                 value={formData.lab_results}
-                onChange={(e) =>
-                  setFormData({ ...formData, lab_results: e.target.value })
-                }
+                onChange={(e) => setFormData({ ...formData, lab_results: e.target.value })}
                 placeholder="Any lab test results"
                 rows={3}
               />
@@ -379,35 +365,59 @@ export default function MedicalRecordFormPage() {
 
         {/* Attachments */}
         <div className="rounded-lg bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-slate-900 mb-4">
-            Attachments
-          </h2>
-          <div className="flex items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 p-6 text-center">
-            <Upload className="h-5 w-5 text-slate-400" />
-            <div>
-              <p className="text-sm font-medium text-slate-900">
-                Upload attachments
-              </p>
-              <p className="text-xs text-slate-500">
-                Images, test results, or other documents
-              </p>
-            </div>
+          <h2 className="text-lg font-semibold text-slate-900 mb-4">Attachments</h2>
+          <div className="space-y-4">
+            {formData.attachments.map((attachment, index) => (
+              <div
+                key={index}
+                className="flex items-center gap-3 rounded-lg border border-slate-200 p-3"
+              >
+                <img
+                  src={attachment}
+                  alt={`Attachment ${index + 1}`}
+                  className="h-16 w-16 rounded object-cover"
+                />
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-slate-900 truncate">
+                    Attachment {index + 1}
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    {attachment.startsWith("data:image") ? "Image" : "Document"}
+                  </p>
+                </div>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => handleRemoveAttachment(index)}
+                >
+                  <X className="h-4 w-4 text-danger-500" />
+                </Button>
+              </div>
+            ))}
+            <label className="flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed border-slate-300 p-6 text-center hover:border-primary-400">
+              <Upload className="h-5 w-5 text-slate-400" />
+              <div>
+                <p className="text-sm font-medium text-slate-900">Upload attachments</p>
+                <p className="text-xs text-slate-500">Images, test results, or other documents</p>
+              </div>
+              <input
+                type="file"
+                accept="image/*,.pdf"
+                multiple
+                onChange={handleFileChange}
+                className="hidden"
+              />
+            </label>
           </div>
         </div>
 
         {/* Buttons */}
         <div className="flex gap-3">
-          <Button
-            type="submit"
-            disabled={createMutation.isPending || updateMutation.isPending}
-          >
+          <Button type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
             {recordId ? "Update Record" : "Create Record"}
           </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => navigate("/medical-records")}
-          >
+          <Button type="button" variant="outline" onClick={() => navigate("/medical-records")}>
             Cancel
           </Button>
         </div>

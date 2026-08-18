@@ -1,33 +1,50 @@
+import { lazy, Suspense } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Layout from "@/components/layout/Layout";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PortalRoute from "@/components/PortalRoute";
 import LoginPage from "@/features/auth/pages/LoginPage";
-import DashboardPage from "@/features/dashboard/pages/DashboardPage";
 
-import CustomersPage from "@/features/customers/pages/CustomersPage";
-import CustomerDetailPage from "@/features/customers/pages/CustomerDetailPage";
-import PetsPage from "@/features/pets/pages/PetsPage";
-import PetDetailPage from "@/features/pets/pages/PetDetailPage";
-import AppointmentsPage from "@/features/appointments/pages/AppointmentsPage";
-import AppointmentDetailPage from "@/features/appointments/pages/AppointmentDetailPage";
-import MedicalRecordsPage from "@/features/medical-records/pages/MedicalRecordsPage";
-import MedicalRecordFormPage from "@/features/medical-records/pages/MedicalRecordFormPage";
-import PetHotelPage from "@/features/pet-hotel/pages/PetHotelPage";
-import GroomingPage from "@/features/grooming/pages/GroomingPage";
-import ProductsPage from "@/features/products/pages/ProductsPage";
-import InventoryPage from "@/features/inventory/pages/InventoryPage";
-import PurchaseOrdersPage from "@/features/purchase-orders/pages/PurchaseOrdersPage";
-import POSPage from "@/features/pos/pages/POSPage";
-import InvoicesPage from "@/features/invoices/pages/InvoicesPage";
-import CashShiftsPage from "@/features/cash-shifts/pages/CashShiftsPage";
-import LoyaltyPage from "@/features/loyalty/pages/LoyaltyPage";
-import PromotionsPage from "@/features/promotions/pages/PromotionsPage";
-import ExpensesPage from "@/features/expenses/pages/ExpensesPage";
-import ReportsPage from "@/features/reports/pages/ReportsPage";
-import SettingsPage from "@/features/settings/pages/SettingsPage";
-import ChangePinPage from "@/features/settings/pages/ChangePinPage";
-import PortalApp from "@/features/portal/PortalApp";
+const DashboardPage = lazy(() => import("@/features/dashboard/pages/DashboardPage"));
+const CustomersPage = lazy(() => import("@/features/customers/pages/CustomersPage"));
+const CustomerDetailPage = lazy(() => import("@/features/customers/pages/CustomerDetailPage"));
+const PetsPage = lazy(() => import("@/features/pets/pages/PetsPage"));
+const PetDetailPage = lazy(() => import("@/features/pets/pages/PetDetailPage"));
+const AppointmentsPage = lazy(() => import("@/features/appointments/pages/AppointmentsPage"));
+const AppointmentDetailPage = lazy(
+  () => import("@/features/appointments/pages/AppointmentDetailPage")
+);
+const MedicalRecordsPage = lazy(
+  () => import("@/features/medical-records/pages/MedicalRecordsPage")
+);
+const MedicalRecordFormPage = lazy(
+  () => import("@/features/medical-records/pages/MedicalRecordFormPage")
+);
+const PetHotelPage = lazy(() => import("@/features/pet-hotel/pages/PetHotelPage"));
+const GroomingPage = lazy(() => import("@/features/grooming/pages/GroomingPage"));
+const ProductsPage = lazy(() => import("@/features/products/pages/ProductsPage"));
+const InventoryPage = lazy(() => import("@/features/inventory/pages/InventoryPage"));
+const PurchaseOrdersPage = lazy(
+  () => import("@/features/purchase-orders/pages/PurchaseOrdersPage")
+);
+const POSPage = lazy(() => import("@/features/pos/pages/POSPage"));
+const InvoicesPage = lazy(() => import("@/features/invoices/pages/InvoicesPage"));
+const CashShiftsPage = lazy(() => import("@/features/cash-shifts/pages/CashShiftsPage"));
+const LoyaltyPage = lazy(() => import("@/features/loyalty/pages/LoyaltyPage"));
+const PromotionsPage = lazy(() => import("@/features/promotions/pages/PromotionsPage"));
+const ExpensesPage = lazy(() => import("@/features/expenses/pages/ExpensesPage"));
+const ReportsPage = lazy(() => import("@/features/reports/pages/ReportsPage"));
+const SettingsPage = lazy(() => import("@/features/settings/pages/SettingsPage"));
+const ChangePinPage = lazy(() => import("@/features/settings/pages/ChangePinPage"));
+const PortalApp = lazy(() => import("@/features/portal/PortalApp"));
+
+function RouteSkeleton() {
+  return (
+    <div className="flex items-center justify-center p-8">
+      <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary-500 border-t-transparent" />
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -43,21 +60,69 @@ function App() {
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardPage />} />
-        <Route path="customers" element={<CustomersPage />} />
-        <Route path="customers/:customerId" element={<CustomerDetailPage />} />
-        <Route path="pets" element={<PetsPage />} />
-        <Route path="pets/:petId" element={<PetDetailPage />} />
-        <Route path="appointments" element={<AppointmentsPage />} />
+        <Route
+          path="dashboard"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <DashboardPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="customers"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <CustomersPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="customers/:customerId"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <CustomerDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="pets"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <PetsPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="pets/:petId"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <PetDetailPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="appointments"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <AppointmentsPage />
+            </Suspense>
+          }
+        />
         <Route
           path="appointments/:appointmentId"
-          element={<AppointmentDetailPage />}
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <AppointmentDetailPage />
+            </Suspense>
+          }
         />
         <Route
           path="medical-records"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN", "DOKTER"]}>
-              <MedicalRecordsPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <MedicalRecordsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -65,7 +130,9 @@ function App() {
           path="medical-records/new"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN", "DOKTER"]}>
-              <MedicalRecordFormPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <MedicalRecordFormPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -73,18 +140,43 @@ function App() {
           path="medical-records/:recordId"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN", "DOKTER"]}>
-              <MedicalRecordFormPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <MedicalRecordFormPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
-        <Route path="pet-hotel" element={<PetHotelPage />} />
-        <Route path="grooming" element={<GroomingPage />} />
-        <Route path="products" element={<ProductsPage />} />
+        <Route
+          path="pet-hotel"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <PetHotelPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="grooming"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <GroomingPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="products"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <ProductsPage />
+            </Suspense>
+          }
+        />
         <Route
           path="inventory"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <InventoryPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <InventoryPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -92,18 +184,43 @@ function App() {
           path="purchase-orders"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <PurchaseOrdersPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <PurchaseOrdersPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
-        <Route path="pos" element={<POSPage />} />
-        <Route path="invoices" element={<InvoicesPage />} />
-        <Route path="cash-shifts" element={<CashShiftsPage />} />
+        <Route
+          path="pos"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <POSPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="invoices"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <InvoicesPage />
+            </Suspense>
+          }
+        />
+        <Route
+          path="cash-shifts"
+          element={
+            <Suspense fallback={<RouteSkeleton />}>
+              <CashShiftsPage />
+            </Suspense>
+          }
+        />
         <Route
           path="loyalty"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <LoyaltyPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <LoyaltyPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -111,7 +228,9 @@ function App() {
           path="promotions"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <PromotionsPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <PromotionsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -119,7 +238,9 @@ function App() {
           path="expenses"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <ExpensesPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <ExpensesPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -127,7 +248,9 @@ function App() {
           path="reports"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <ReportsPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <ReportsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -135,7 +258,9 @@ function App() {
           path="settings"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <SettingsPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <SettingsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -143,7 +268,9 @@ function App() {
           path="settings/*"
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
-              <SettingsPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <SettingsPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -151,7 +278,9 @@ function App() {
           path="settings/change-pin"
           element={
             <ProtectedRoute>
-              <ChangePinPage />
+              <Suspense fallback={<RouteSkeleton />}>
+                <ChangePinPage />
+              </Suspense>
             </ProtectedRoute>
           }
         />
@@ -161,7 +290,9 @@ function App() {
         path="/portal/*"
         element={
           <PortalRoute>
-            <PortalApp />
+            <Suspense fallback={<RouteSkeleton />}>
+              <PortalApp />
+            </Suspense>
           </PortalRoute>
         }
       />

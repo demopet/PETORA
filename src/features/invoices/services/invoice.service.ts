@@ -1,14 +1,6 @@
 import { supabase } from "@/lib/supabase/client";
-import {
-  createInvoiceSchema,
-  recordPaymentSchema,
-} from "@/schemas/invoice";
-import type {
-  Invoice,
-  InvoiceItem,
-  CreateInvoiceInput,
-  RecordPaymentInput,
-} from "@/types/invoice";
+import { createInvoiceSchema, recordPaymentSchema } from "@/schemas/invoice";
+import type { Invoice, InvoiceItem, CreateInvoiceInput, RecordPaymentInput } from "@/types/invoice";
 
 export class AppError extends Error {
   message_: string;
@@ -26,14 +18,7 @@ function mapPgError(error: { message: string; code?: string }): AppError {
   const msg = error.message || "Unknown error";
 
   if (error.code === "42501" || msg.includes("FORBIDDEN")) {
-    return new AppError(
-      "You do not have permission to perform this action.",
-      "FORBIDDEN",
-    );
-  }
-  if (error.code === "22000" || msg.includes("VALIDATION_ERROR")) {
-    const clean = msg.replace("VALIDATION_ERROR: ", "");
-    return new AppError(clean, "VALIDATION_ERROR");
+    return new AppError("You do not have permission to perform this action.", "FORBIDDEN");
   }
   if (msg.includes("INSUFFICIENT_STOCK")) {
     return new AppError(msg.replace("INSUFFICIENT_STOCK: ", ""), "INSUFFICIENT_STOCK");
@@ -42,7 +27,10 @@ function mapPgError(error: { message: string; code?: string }): AppError {
     return new AppError(msg.replace("PROMOTION_INVALID: ", ""), "PROMOTION_INVALID");
   }
   if (msg.includes("INSUFFICIENT_LOYALTY_POINTS")) {
-    return new AppError(msg.replace("INSUFFICIENT_LOYALTY_POINTS: ", ""), "INSUFFICIENT_LOYALTY_POINTS");
+    return new AppError(
+      msg.replace("INSUFFICIENT_LOYALTY_POINTS: ", ""),
+      "INSUFFICIENT_LOYALTY_POINTS"
+    );
   }
   if (msg.includes("INVOICE_CANCELLED")) {
     return new AppError(msg.replace("INVOICE_CANCELLED: ", ""), "INVOICE_CANCELLED");
@@ -56,14 +44,18 @@ function mapPgError(error: { message: string; code?: string }): AppError {
   if (msg.includes("PROMOTION_NOT_FOUND")) {
     return new AppError(msg.replace("PROMOTION_NOT_FOUND: ", ""), "PROMOTION_NOT_FOUND");
   }
-  if (error.code === "23505" || msg.includes("CONFLICT")) {
-    return new AppError(msg.replace("CONFLICT: ", ""), "CONFLICT");
-  }
   if (msg.includes("INVOICE_NOT_FOUND")) {
     return new AppError(msg.replace("INVOICE_NOT_FOUND: ", ""), "INVOICE_NOT_FOUND");
   }
   if (msg.includes("ALREADY_CANCELLED")) {
     return new AppError(msg.replace("ALREADY_CANCELLED: ", ""), "ALREADY_CANCELLED");
+  }
+  if (error.code === "22000" || msg.includes("VALIDATION_ERROR")) {
+    const clean = msg.replace("VALIDATION_ERROR: ", "");
+    return new AppError(clean, "VALIDATION_ERROR");
+  }
+  if (error.code === "23505" || msg.includes("CONFLICT")) {
+    return new AppError(msg.replace("CONFLICT: ", ""), "CONFLICT");
   }
 
   return new AppError(msg, error.code);
@@ -71,7 +63,7 @@ function mapPgError(error: { message: string; code?: string }): AppError {
 
 export async function createInvoice(
   input: CreateInvoiceInput,
-  callerUserId: string,
+  callerUserId: string
 ): Promise<Invoice & { items: InvoiceItem[] }> {
   const validated = createInvoiceSchema.parse(input);
 
@@ -109,7 +101,7 @@ export async function createInvoice(
 export async function recordPayment(
   invoiceId: string,
   input: RecordPaymentInput,
-  callerUserId: string,
+  callerUserId: string
 ): Promise<{ payment: unknown; invoice: Invoice }> {
   const validated = recordPaymentSchema.parse(input);
 
@@ -133,7 +125,7 @@ export async function recordPayment(
 export async function cancelInvoice(
   invoiceId: string,
   callerUserId: string,
-  reason?: string,
+  reason?: string
 ): Promise<Invoice> {
   const { data, error } = await supabase.rpc("fn_cancel_invoice", {
     p_caller_id: callerUserId,
@@ -150,7 +142,7 @@ export async function cancelInvoice(
 
 export async function getDailySales(
   date: string,
-  callerUserId: string,
+  callerUserId: string
 ): Promise<{
   date: string;
   total_sales: number;

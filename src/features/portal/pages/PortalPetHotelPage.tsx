@@ -1,60 +1,75 @@
 import { useState, type FormEvent } from "react";
-import { CalendarDays, Plus, X } from "lucide-react";
+import { Plus, X, Hotel } from "lucide-react";
 import { useAuth } from "@/features/auth/context/AuthContext";
 import {
   usePortalPets,
-  usePortalAppointments,
-  useCreatePortalAppointment,
+  usePortalPetHotelBookings,
+  useCreatePortalPetHotelBooking,
 } from "../hooks/use-portal";
-import { formatDate, formatTime } from "@/lib/utils";
+import { formatDate } from "@/lib/utils";
 import type { Pet } from "@/types";
 
-export default function PortalAppointmentsPage() {
+export default function PortalPetHotelPage() {
   const { user } = useAuth();
   const customerId = user?.customer_id ?? "";
   const callerUserId = user?.id ?? "";
 
   const { data: pets, isLoading: petsLoading } = usePortalPets(customerId);
   const {
-    data: appointments,
-    isLoading: appointmentsLoading,
+    data: bookings,
+    isLoading: bookingsLoading,
     refetch,
-  } = usePortalAppointments(customerId);
-  const createMutation = useCreatePortalAppointment(callerUserId);
+  } = usePortalPetHotelBookings(customerId);
+  const createMutation = useCreatePortalPetHotelBooking(callerUserId);
 
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedPetId, setSelectedPetId] = useState("");
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
-  const [complaint, setComplaint] = useState("");
+  const [checkIn, setCheckIn] = useState("");
+  const [checkOut, setCheckOut] = useState("");
+  const [specialNotes, setSpecialNotes] = useState("");
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!customerId || !selectedPetId || !date || !time) return;
+    if (!customerId || !selectedPetId || !checkIn || !checkOut) return;
 
     await createMutation.mutateAsync({
       customer_id: customerId,
       pet_id: selectedPetId,
-      appointment_date: date,
-      appointment_time: time,
-      complaint: complaint || undefined,
+      check_in_date: checkIn,
+      check_out_date: checkOut,
+      special_notes: specialNotes || undefined,
     });
 
     setIsFormOpen(false);
     setSelectedPetId("");
-    setDate("");
-    setTime("");
-    setComplaint("");
+    setCheckIn("");
+    setCheckOut("");
+    setSpecialNotes("");
     void refetch();
+  };
+
+  const statusColor = (status: string) => {
+    switch (status) {
+      case "BOOKED":
+        return "bg-blue-100 text-blue-700";
+      case "CHECKED_IN":
+        return "bg-amber-100 text-amber-700";
+      case "CHECKED_OUT":
+        return "bg-emerald-100 text-emerald-700";
+      case "CANCELLED":
+        return "bg-red-100 text-red-700";
+      default:
+        return "bg-slate-100 text-slate-700";
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50 p-4 text-slate-900">
       <div className="mb-4 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Appointments</h1>
+          <h1 className="text-2xl font-bold">Pet Hotel</h1>
           <p className="mt-1 text-sm text-slate-600">
-            Pilih hewan, tanggal, dan jam untuk membuat janji konsultasi.
+            Booking penginapan untuk hewan peliharaan Anda.
           </p>
         </div>
         <button
@@ -70,7 +85,7 @@ export default function PortalAppointmentsPage() {
       {isFormOpen && (
         <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Buat Appointment</h2>
+            <h2 className="text-lg font-semibold">Booking Pet Hotel</h2>
             <button
               type="button"
               onClick={() => setIsFormOpen(false)}
@@ -107,44 +122,44 @@ export default function PortalAppointmentsPage() {
             </div>
 
             <div>
-              <label htmlFor="appointment-date" className="mb-2 block text-sm font-medium">
-                Tanggal
+              <label htmlFor="check-in" className="mb-2 block text-sm font-medium">
+                Check-in
               </label>
               <input
-                id="appointment-date"
+                id="check-in"
                 type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="appointment-time" className="mb-2 block text-sm font-medium">
-                Jam
+              <label htmlFor="check-out" className="mb-2 block text-sm font-medium">
+                Check-out
               </label>
               <input
-                id="appointment-time"
-                type="time"
-                value={time}
-                onChange={(e) => setTime(e.target.value)}
+                id="check-out"
+                type="date"
+                value={checkOut}
+                onChange={(e) => setCheckOut(e.target.value)}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
                 required
               />
             </div>
 
             <div>
-              <label htmlFor="appointment-complaint" className="mb-2 block text-sm font-medium">
-                Keluhan
+              <label htmlFor="special-notes" className="mb-2 block text-sm font-medium">
+                Catatan Khusus
               </label>
               <textarea
-                id="appointment-complaint"
-                value={complaint}
-                onChange={(e) => setComplaint(e.target.value)}
+                id="special-notes"
+                value={specialNotes}
+                onChange={(e) => setSpecialNotes(e.target.value)}
                 rows={3}
                 className="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2"
-                placeholder="Jelaskan keluhan hewan peliharaan Anda..."
+                placeholder="Alergi, kebiasaan makan, dll..."
               />
             </div>
 
@@ -153,7 +168,7 @@ export default function PortalAppointmentsPage() {
               disabled={createMutation.isPending}
               className="w-full rounded-xl bg-primary-600 px-4 py-2.5 font-medium text-white disabled:opacity-50"
             >
-              {createMutation.isPending ? "Membuat..." : "Buat Appointment"}
+              {createMutation.isPending ? "Membuat..." : "Buat Booking"}
             </button>
             {createMutation.isError && (
               <p className="text-sm text-red-600">{(createMutation.error as Error).message}</p>
@@ -163,52 +178,44 @@ export default function PortalAppointmentsPage() {
       )}
 
       <div className="space-y-3">
-        {appointmentsLoading ? (
+        {bookingsLoading ? (
           <div className="h-24 animate-pulse rounded-2xl bg-slate-200" />
-        ) : appointments && appointments.length > 0 ? (
-          appointments.map((appointment) => (
+        ) : bookings && bookings.length > 0 ? (
+          bookings.map((booking) => (
             <div
-              key={appointment.id}
+              key={booking.id}
               className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
             >
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-700">
-                    <CalendarDays className="h-5 w-5" />
+                    <Hotel className="h-5 w-5" />
                   </div>
                   <div>
                     <p className="font-semibold">
-                      {pets?.find((p) => p.id === appointment.pet_id)?.name ?? "Hewan"}
+                      {pets?.find((p) => p.id === booking.pet_id)?.name ?? "Hewan"}
                     </p>
                     <p className="text-sm text-slate-600">
-                      {formatDate(appointment.appointment_date)} •{" "}
-                      {formatTime(appointment.appointment_time)}
+                      {formatDate(booking.check_in_date)} - {formatDate(booking.check_out_date)}
                     </p>
-                    <p className="text-sm text-slate-600">
-                      {appointment.complaint ?? "Konsultasi umum"}
-                    </p>
+                    <p className="text-sm text-slate-600">{booking.booking_number}</p>
                   </div>
                 </div>
                 <span
-                  className={`rounded-full px-2 py-1 text-xs font-medium ${
-                    appointment.status === "WAITING"
-                      ? "bg-amber-100 text-amber-700"
-                      : appointment.status === "IN_PROGRESS"
-                        ? "bg-blue-100 text-blue-700"
-                        : appointment.status === "DONE"
-                          ? "bg-emerald-100 text-emerald-700"
-                          : "bg-red-100 text-red-700"
-                  }`}
+                  className={`rounded-full px-2 py-1 text-xs font-medium ${statusColor(booking.status)}`}
                 >
-                  {appointment.status.replace("_", " ")}
+                  {booking.status.replace("_", " ")}
                 </span>
               </div>
+              {booking.special_notes && (
+                <p className="mt-2 text-xs text-slate-500">Catatan: {booking.special_notes}</p>
+              )}
             </div>
           ))
         ) : (
           <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <CalendarDays className="mx-auto mb-2 h-8 w-8 text-slate-400" />
-            <p className="text-sm text-slate-600">Belum ada appointment.</p>
+            <Hotel className="mx-auto mb-2 h-8 w-8 text-slate-400" />
+            <p className="text-sm text-slate-600">Belum ada booking pet hotel.</p>
           </div>
         )}
       </div>

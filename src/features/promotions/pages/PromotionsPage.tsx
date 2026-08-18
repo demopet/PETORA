@@ -6,23 +6,23 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { usePromotions } from "../hooks/use-promotions";
-import { useArchivePromotion } from "../hooks/use-promotions";
+import { useCancelPromotion } from "../hooks/use-promotions";
 import type { Promotion } from "@/types/promotion";
 
 export default function PromotionsPage() {
   const [search, setSearch] = useState("");
   const { data: promotions, isLoading, error } = usePromotions();
-  const archiveMutation = useArchivePromotion();
+  const cancelMutation = useCancelPromotion();
 
   const filteredPromotions = promotions?.filter(
     (promo) =>
       promo.name.toLowerCase().includes(search.toLowerCase()) ||
-      promo.code?.toLowerCase().includes(search.toLowerCase()),
+      promo.code?.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleArchive = async (id: string) => {
     if (confirm("Are you sure you want to archive this promotion?")) {
-      await archiveMutation.mutateAsync(id);
+      await cancelMutation.mutateAsync({ id, callerUserId: "" });
     }
   };
 
@@ -33,9 +33,7 @@ export default function PromotionsPage() {
       cell: ({ original }: { original: Promotion }) => (
         <div>
           <div className="font-medium text-slate-900">{original.name}</div>
-          <div className="text-sm text-slate-500">
-            Code: {original.code || "N/A"}
-          </div>
+          <div className="text-sm text-slate-500">Code: {original.code || "N/A"}</div>
         </div>
       ),
     },
@@ -61,20 +59,14 @@ export default function PromotionsPage() {
     {
       header: "Status",
       accessorKey: "status" as const,
-      cell: ({ original }: { original: Promotion }) => (
-        <StatusBadge status={original.status} />
-      ),
+      cell: ({ original }: { original: Promotion }) => <StatusBadge status={original.status} />,
     },
     {
       header: "Actions",
       accessorKey: "id" as const,
       cell: ({ original }: { original: Promotion }) => (
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleArchive(original.id)}
-          >
+          <Button variant="ghost" size="icon" onClick={() => handleArchive(original.id)}>
             <Trash2 className="h-4 w-4 text-danger-500" />
           </Button>
         </div>

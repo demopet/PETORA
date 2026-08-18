@@ -13,6 +13,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { toast } from "sonner";
 import { AppointmentForm } from "../components/AppointmentForm";
 import { AppointmentCalendar } from "../components/AppointmentCalendar";
 import {
@@ -22,6 +23,7 @@ import {
 } from "../hooks/use-appointments";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { usePets } from "@/features/pets/hooks/use-pets";
+import { useUsers } from "@/features/users/hooks/use-users";
 import type { Appointment, AppointmentStatus } from "@/types/appointment";
 
 type ViewMode = "list" | "calendar";
@@ -32,18 +34,20 @@ export default function AppointmentsPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [promptOpen, setPromptOpen] = useState(false);
-  const [promptAppointment, setPromptAppointment] =
-    useState<Appointment | null>(null);
+  const [promptAppointment, setPromptAppointment] = useState<Appointment | null>(null);
   const { data: appointments, isLoading, error } = useAppointments();
   const { data: customers } = useCustomers();
   const { data: pets } = usePets();
+  const { data: users } = useUsers();
   const createAppointmentMutation = useCreateAppointment();
   const updateStatusMutation = useUpdateAppointmentStatus();
+
+  const doctors = users?.filter((user) => user.role === "DOKTER") || [];
 
   const filteredAppointments = appointments?.filter(
     (apt) =>
       apt.complaint?.toLowerCase().includes(search.toLowerCase()) ||
-      apt.customer_id.toLowerCase().includes(search.toLowerCase()),
+      apt.customer_id.toLowerCase().includes(search.toLowerCase())
   );
 
   const columns = [
@@ -65,15 +69,12 @@ export default function AppointmentsPage() {
     {
       header: "Status",
       accessorKey: "status" as const,
-      cell: ({ original }: { original: Appointment }) => (
-        <StatusBadge status={original.status} />
-      ),
+      cell: ({ original }: { original: Appointment }) => <StatusBadge status={original.status} />,
     },
     {
       header: "Queue",
       accessorKey: "queue_number" as const,
-      cell: ({ original }: { original: Appointment }) =>
-        original.queue_number || "-",
+      cell: ({ original }: { original: Appointment }) => original.queue_number || "-",
     },
     {
       header: "Actions",
@@ -120,8 +121,8 @@ export default function AppointmentsPage() {
         setPromptAppointment(result.appointment);
         setPromptOpen(true);
       }
-    } catch (e) {
-      console.error("Failed to update status", e);
+    } catch {
+      toast.error("Failed to update appointment status");
     }
   };
 
@@ -227,7 +228,7 @@ export default function AppointmentsPage() {
             customer_id: p.customer_id,
           })) || []
         }
-        doctors={[]}
+        doctors={doctors.map((d) => ({ id: d.id, full_name: d.full_name }))}
       />
 
       <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
@@ -236,9 +237,8 @@ export default function AppointmentsPage() {
             <DialogTitle>Create Medical Record</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-slate-600">
-            Appointment #{promptAppointment?.queue_number} has been marked as
-            DONE. Would you like to create a medical record for this
-            appointment?
+            Appointment #{promptAppointment?.queue_number} has been marked as DONE. Would you like
+            to create a medical record for this appointment?
           </p>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPromptOpen(false)}>
@@ -248,9 +248,7 @@ export default function AppointmentsPage() {
               onClick={() => {
                 setPromptOpen(false);
                 if (promptAppointment) {
-                  navigate(
-                    `/medical-records/new?appointmentId=${promptAppointment.id}`,
-                  );
+                  navigate(`/medical-records/new?appointmentId=${promptAppointment.id}`);
                 }
               }}
             >

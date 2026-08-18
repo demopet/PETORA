@@ -15,21 +15,11 @@ import { FormField } from "@/components/ui/form-field";
 interface UserFormProps {
   open: boolean;
   onOpenChange: (_open: boolean) => void;
-  onSubmit: (_data: {
-    username: string;
-    pin: string;
-    role: string;
-    full_name: string;
-  }) => void;
+  onSubmit: (_data: { username: string; pin: string; role: string; full_name: string }) => void;
   isLoading?: boolean;
 }
 
-export function UserForm({
-  open,
-  onOpenChange,
-  onSubmit,
-  isLoading,
-}: UserFormProps) {
+export function UserForm({ open, onOpenChange, onSubmit, isLoading }: UserFormProps) {
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
   const [role, setRole] = useState("");
@@ -117,28 +107,20 @@ export function UserForm({
           </FormField>
 
           <FormField label="Role" required>
-            <Select
-              value={role}
-              onValueChange={setRole}
-              placeholder="Pilih role"
-            >
+            <Select value={role} onValueChange={setRole} placeholder="Pilih role">
               <SelectOption value="ADMIN">Admin</SelectOption>
               <SelectOption value="DOKTER">Dokter</SelectOption>
               <SelectOption value="KASIR">Kasir</SelectOption>
             </Select>
-            {errors.role && (
-              <p className="text-sm text-danger-500">{errors.role}</p>
-            )}
           </FormField>
+          {errors.role && <p className="text-sm text-danger-500">{errors.role}</p>}
 
           <FormField label="PIN" required>
             <Input
               type="text"
               inputMode="numeric"
               value={pin}
-              onChange={(e) =>
-                setPin(e.target.value.replace(/\D/g, "").slice(0, 6))
-              }
+              onChange={(e) => setPin(e.target.value.replace(/\D/g, "").slice(0, 6))}
               placeholder="6 digit angka"
               error={errors.pin}
               maxLength={6}
@@ -146,11 +128,7 @@ export function UserForm({
           </FormField>
 
           <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Batal
             </Button>
             <Button type="submit" disabled={isLoading}>

@@ -2,67 +2,90 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi, beforeEach } from "vitest";
 import ReportsPage from "./ReportsPage";
 
-const mockUseQuery = vi.fn();
+const mockUseRevenueReport = vi.fn();
+const mockUseProfitLossReport = vi.fn();
+const mockUseInventoryValuationReport = vi.fn();
 
-vi.mock("@tanstack/react-query", async () => {
-  const actual = await vi.importActual<typeof import("@tanstack/react-query")>(
-    "@tanstack/react-query",
-  );
-  return {
-    ...actual,
-    useQuery: (options: unknown) => mockUseQuery(options),
-  };
-});
+vi.mock("@/features/auth/context/AuthContext", () => ({
+  useAuth: () => ({ user: { id: "user-1" } }),
+}));
+
+vi.mock("../hooks/use-reports", () => ({
+  useRevenueReport: () => mockUseRevenueReport(),
+  useProfitLossReport: () => mockUseProfitLossReport(),
+  useInventoryValuationReport: () => mockUseInventoryValuationReport(),
+}));
 
 describe("ReportsPage", () => {
   beforeEach(() => {
-    mockUseQuery.mockImplementation(({ queryKey }) => {
-      if (queryKey[0] === "customers") {
-        return {
-          data: [{ id: "1" }, { id: "2" }, { id: "3" }],
-          isLoading: false,
-          error: null,
-        };
-      }
+    mockUseRevenueReport.mockReturnValue({
+      data: [
+        {
+          period: "2026-08-18",
+          invoice_type: "POS",
+          total_revenue: 500000,
+          transaction_count: 5,
+        },
+      ],
+      isLoading: false,
+      error: null,
+    });
 
-      if (queryKey[0] === "pets") {
-        return {
-          data: [{ id: "1" }, { id: "2" }, { id: "3" }, { id: "4" }],
-          isLoading: false,
-          error: null,
-        };
-      }
+    mockUseProfitLossReport.mockReturnValue({
+      data: {
+        revenue: 1000000,
+        cogs: 400000,
+        expenses: 200000,
+        net_profit: 400000,
+      },
+      isLoading: false,
+      error: null,
+    });
 
-      if (queryKey[0] === "appointments") {
-        return {
-          data: [{ id: "a1" }, { id: "a2" }],
-          isLoading: false,
-          error: null,
-        };
-      }
-
-      if (queryKey[0] === "reports" && queryKey[1] === "revenue") {
-        return {
-          data: [
-            { total_amount: 500000, created_at: "2026-08-01" },
-            { total_amount: 750000, created_at: "2026-08-02" },
-          ],
-          isLoading: false,
-          error: null,
-        };
-      }
-
-      return { data: [], isLoading: false, error: null };
+    mockUseInventoryValuationReport.mockReturnValue({
+      data: {
+        total_value: 5000000,
+        items: [
+          {
+            product_id: "prod-1",
+            product_name: "Test Product",
+            sku: "SKU-001",
+            stock_quantity: 50,
+            purchase_price: 100000,
+            total_value: 5000000,
+          },
+        ],
+      },
+      isLoading: false,
+      error: null,
     });
   });
 
-  it("renders real customer and pet totals instead of placeholder zeros", () => {
+  it("renders report tabs", () => {
     render(<ReportsPage />);
 
-    expect(screen.getByText("Customers")).toBeInTheDocument();
-    expect(screen.getByText("3")).toBeInTheDocument();
-    expect(screen.getByText("Pets")).toBeInTheDocument();
-    expect(screen.getByText("4")).toBeInTheDocument();
-    expect(screen.getByText(/Revenue Details/i)).toBeInTheDocument();
+    expect(screen.getByText("Revenue")).toBeInTheDocument();
+    expect(screen.getByText("Profit & Loss")).toBeInTheDocument();
+    expect(screen.getByText("Inventory Valuation")).toBeInTheDocument();
+  });
+
+  it("renders revenue report by default", () => {
+    render(<ReportsPage />);
+
+    expect(screen.getAllByText("Total Revenue").length).toBeGreaterThan(0);
+    expect(screen.getByText("Revenue Details")).toBeInTheDocument();
+  });
+
+  it("renders date filters", () => {
+    render(<ReportsPage />);
+
+    expect(screen.getByLabelText("Start Date")).toBeInTheDocument();
+    expect(screen.getByLabelText("End Date")).toBeInTheDocument();
+  });
+
+  it("renders export button", () => {
+    render(<ReportsPage />);
+
+    expect(screen.getByText("Export CSV")).toBeInTheDocument();
   });
 });

@@ -2,7 +2,7 @@ import * as React from "react";
 
 interface FormFieldProps {
   label: string;
-  children: React.ReactNode;
+  children: React.ReactElement;
   required?: boolean;
   id?: string;
 }
@@ -14,7 +14,7 @@ export function FormField({ label, children, required, id }: FormFieldProps) {
         {label}
         {required && <span className="text-danger-500 ml-1">*</span>}
       </label>
-      {React.cloneElement(children as React.ReactElement, { id })}
+      {React.cloneElement(children, { id } as Record<string, unknown>)}
     </div>
   );
 }

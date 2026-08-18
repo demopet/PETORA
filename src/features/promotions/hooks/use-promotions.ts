@@ -1,35 +1,25 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase/client";
-import type { Promotion, CreatePromotionInput } from "@/types/promotion";
+import type { CreatePromotionInput } from "@/types/promotion";
+import {
+  getPromotions,
+  getPromotion,
+  createPromotion,
+  updatePromotion,
+  cancelPromotion,
+  validatePromoCode,
+} from "../services/promotion.service";
 
 export function usePromotions() {
   return useQuery({
     queryKey: ["promotions"],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("promotions")
-        .select("*")
-        .order("start_date", { ascending: false });
-
-      if (error) throw error;
-      return data as Promotion[];
-    },
+    queryFn: async () => getPromotions(),
   });
 }
 
 export function usePromotion(id: string) {
   return useQuery({
     queryKey: ["promotions", id],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from("promotions")
-        .select("*")
-        .eq("id", id)
-        .single();
-
-      if (error) throw error;
-      return data as Promotion;
-    },
+    queryFn: async () => getPromotion(id),
     enabled: !!id,
   });
 }
@@ -38,20 +28,13 @@ export function useCreatePromotion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (input: CreatePromotionInput) => {
-      const { data, error } = await supabase
-        .from("promotions")
-        .insert({
-          ...input,
-          status: "ACTIVE",
-          current_usage: 0,
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as Promotion;
-    },
+    mutationFn: async ({
+      input,
+      callerUserId,
+    }: {
+      input: CreatePromotionInput;
+      callerUserId: string;
+    }) => createPromotion(input, callerUserId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotions"] });
     },
@@ -65,40 +48,44 @@ export function useUpdatePromotion() {
     mutationFn: async ({
       id,
       input,
+      callerUserId,
     }: {
       id: string;
       input: Partial<CreatePromotionInput>;
-    }) => {
-      const { data, error } = await supabase
-        .from("promotions")
-        .update(input)
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data as Promotion;
-    },
+      callerUserId: string;
+    }) => updatePromotion(id, input, callerUserId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotions"] });
     },
   });
 }
 
-export function useArchivePromotion() {
+export function useCancelPromotion() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from("promotions")
-        .update({ status: "EXPIRED" })
-        .eq("id", id);
-
-      if (error) throw error;
-    },
+    mutationFn: async ({ id, callerUserId }: { id: string; callerUserId: string }) =>
+      cancelPromotion(id, callerUserId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["promotions"] });
     },
+  });
+}
+
+export function useValidatePromoCode() {
+  return useMutation({
+    mutationFn: async ({
+      code,
+      subtotal,
+      customerId,
+      callerUserId,
+      items,
+    }: {
+      code: string;
+      subtotal: number;
+      customerId?: string;
+      callerUserId: string;
+      items?: { product_id?: string }[];
+    }) => validatePromoCode(code, subtotal, customerId ?? null, callerUserId, items),
   });
 }

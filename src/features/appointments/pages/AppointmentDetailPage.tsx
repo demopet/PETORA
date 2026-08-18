@@ -2,6 +2,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
+import { toast } from "sonner";
 import {
   useAppointment,
   useUpdateAppointmentStatus,
@@ -22,11 +23,7 @@ export default function AppointmentDetailPage() {
   const { appointmentId } = useParams<{ appointmentId: string }>();
   const navigate = useNavigate();
 
-  const {
-    data: appointment,
-    isLoading,
-    error,
-  } = useAppointment(appointmentId || "");
+  const { data: appointment, isLoading, error } = useAppointment(appointmentId || "");
   const updateStatusMutation = useUpdateAppointmentStatus();
   const cancelMutation = useCancelAppointment();
   const { data: customers } = useCustomers();
@@ -86,8 +83,8 @@ export default function AppointmentDetailPage() {
       if (result.promptCreateMedicalRecord) {
         navigate(`/medical-records/new?appointmentId=${appointment.id}`);
       }
-    } catch (e) {
-      console.error("Failed to update status", e);
+    } catch {
+      toast.error("Failed to update appointment status");
     }
   };
 
@@ -111,9 +108,7 @@ export default function AppointmentDetailPage() {
             <ArrowLeft className="h-4 w-4" />
             Back
           </Button>
-          <h1 className="text-3xl font-bold text-slate-900">
-            Appointment Detail
-          </h1>
+          <h1 className="text-3xl font-bold text-slate-900">Appointment Detail</h1>
           <p className="mt-2 text-slate-600">
             {appointment.appointment_date} at {appointment.appointment_time}
           </p>
@@ -123,16 +118,10 @@ export default function AppointmentDetailPage() {
 
       <div className="grid grid-cols-1 gap-6 rounded-lg bg-white p-6 shadow-sm md:grid-cols-2">
         <div>
-          <p className="text-sm font-medium text-slate-500 uppercase">
-            Customer
-          </p>
+          <p className="text-sm font-medium text-slate-500 uppercase">Customer</p>
           <div className="mt-4">
-            <p className="text-lg font-semibold text-slate-900">
-              {customer?.name || "Unknown"}
-            </p>
-            {customer?.phone && (
-              <p className="mt-1 text-sm text-slate-600">{customer.phone}</p>
-            )}
+            <p className="text-lg font-semibold text-slate-900">{customer?.name || "Unknown"}</p>
+            {customer?.phone && <p className="mt-1 text-sm text-slate-600">{customer.phone}</p>}
           </div>
         </div>
 
@@ -142,16 +131,12 @@ export default function AppointmentDetailPage() {
             <p className="text-lg font-semibold text-slate-900">
               {pet?.name || "Unknown"} ({pet?.species})
             </p>
-            {pet?.breed && (
-              <p className="mt-1 text-sm text-slate-600">{pet.breed}</p>
-            )}
+            {pet?.breed && <p className="mt-1 text-sm text-slate-600">{pet.breed}</p>}
           </div>
         </div>
 
         <div>
-          <p className="text-sm font-medium text-slate-500 uppercase">
-            Queue Number
-          </p>
+          <p className="text-sm font-medium text-slate-500 uppercase">Queue Number</p>
           <p className="mt-4 text-2xl font-bold text-slate-900">
             {appointment.queue_number || "-"}
           </p>
@@ -203,36 +188,27 @@ export default function AppointmentDetailPage() {
             </Button>
           ))}
 
-          {availableTransitions.length === 0 &&
-            appointment.status !== "CANCELLED" && (
-              <div>
-                <Button
-                  onClick={handleCancel}
-                  disabled={cancelMutation.isPending}
-                  variant="outline"
-                >
-                  Cancel Appointment
-                </Button>
-              </div>
-            )}
+          {availableTransitions.length === 0 && appointment.status !== "CANCELLED" && (
+            <div>
+              <Button onClick={handleCancel} disabled={cancelMutation.isPending} variant="outline">
+                Cancel Appointment
+              </Button>
+            </div>
+          )}
         </div>
       </div>
 
       {appointment.status === "DONE" && (
         <div className="flex gap-2 rounded-lg border border-green-200 bg-green-50 p-4">
           <div className="flex-1">
-            <p className="text-sm font-semibold text-green-900">
-              Appointment completed
-            </p>
+            <p className="text-sm font-semibold text-green-900">Appointment completed</p>
             <p className="mt-1 text-sm text-green-800">
               Create a medical record to document the visit.
             </p>
           </div>
           <Button
             size="sm"
-            onClick={() =>
-              navigate(`/medical-records/new?appointmentId=${appointment.id}`)
-            }
+            onClick={() => navigate(`/medical-records/new?appointmentId=${appointment.id}`)}
           >
             Create Medical Record
           </Button>

@@ -1,12 +1,12 @@
-import { Bell, Calendar, Gift, Home, ShoppingBag, User } from "lucide-react";
+import { Bell, Calendar, Home, Hotel, Scissors, User } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { label: "Home", to: "/portal", icon: Home },
   { label: "Appointment", to: "/portal/appointments", icon: Calendar },
-  { label: "Shop", to: "/portal/shop", icon: ShoppingBag },
-  { label: "Rewards", to: "/portal/loyalty", icon: Gift },
+  { label: "Grooming", to: "/portal/grooming", icon: Scissors },
+  { label: "Hotel", to: "/portal/pet-hotel", icon: Hotel },
   { label: "Profile", to: "/portal/profile", icon: User },
 ];
 
@@ -49,9 +49,7 @@ export default function PortalLayout() {
               className={({ isActive }) =>
                 cn(
                   "flex flex-col items-center justify-center gap-1 rounded-xl px-2 py-2 text-[11px] font-medium transition-colors",
-                  isActive
-                    ? "bg-primary-50 text-primary-700"
-                    : "text-slate-500 hover:bg-slate-100",
+                  isActive ? "bg-primary-50 text-primary-700" : "text-slate-500 hover:bg-slate-100"
                 )
               }
             >
