@@ -1,43 +1,51 @@
-import { useState } from 'react'
-import { Plus, Search, Trash2, Edit, UserPlus } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { CustomerForm } from '../components/CustomerForm'
-import { useCustomers, useCreateCustomer, useUpdateCustomer, useDeleteCustomer } from '../hooks/use-customers'
-import type { Customer } from '@/types/customer'
+import { useState } from "react";
+import { Plus, Search, Trash2, Edit, Eye, UserPlus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { CustomerForm } from "../components/CustomerForm";
+import {
+  useCustomers,
+  useCreateCustomer,
+  useUpdateCustomer,
+  useDeleteCustomer,
+} from "../hooks/use-customers";
+import type { Customer } from "@/types/customer";
 
 export default function CustomersPage() {
-  const [search, setSearch] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null)
-  const { data: customers, isLoading, error } = useCustomers()
-  const createMutation = useCreateCustomer()
-  const updateMutation = useUpdateCustomer()
-  const deleteMutation = useDeleteCustomer()
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const { data: customers, isLoading, error } = useCustomers();
+  const createMutation = useCreateCustomer();
+  const updateMutation = useUpdateCustomer();
+  const deleteMutation = useDeleteCustomer();
 
-  const filteredCustomers = customers?.filter((customer) =>
-    customer.name.toLowerCase().includes(search.toLowerCase()) ||
-    customer.phone?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredCustomers = customers?.filter(
+    (customer) =>
+      customer.name.toLowerCase().includes(search.toLowerCase()) ||
+      customer.phone?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this customer?')) {
-      await deleteMutation.mutateAsync(id)
+    if (confirm("Are you sure you want to delete this customer?")) {
+      await deleteMutation.mutateAsync(id);
     }
-  }
+  };
 
   const handleEdit = (customer: Customer) => {
-    setEditingCustomer(customer)
-    setFormOpen(true)
-  }
+    setEditingCustomer(customer);
+    setFormOpen(true);
+  };
 
   const columns = [
     {
-      header: 'Name',
-      accessorKey: 'name' as const,
+      header: "Name",
+      accessorKey: "name" as const,
       cell: ({ original }: { original: Customer }) => (
         <div>
           <div className="font-medium text-slate-900">{original.name}</div>
@@ -46,23 +54,35 @@ export default function CustomersPage() {
       ),
     },
     {
-      header: 'Email',
-      accessorKey: 'email' as const,
-      cell: ({ original }: { original: Customer }) => original.email || '-',
+      header: "Email",
+      accessorKey: "email" as const,
+      cell: ({ original }: { original: Customer }) => original.email || "-",
     },
     {
-      header: 'Status',
-      accessorKey: 'is_active' as const,
+      header: "Status",
+      accessorKey: "is_active" as const,
       cell: ({ original }: { original: Customer }) => (
-        <StatusBadge status={original.is_active ? 'ACTIVE' : 'ARCHIVED'} />
+        <StatusBadge status={original.is_active ? "ACTIVE" : "ARCHIVED"} />
       ),
     },
     {
-      header: 'Actions',
-      accessorKey: 'id' as const,
+      header: "Actions",
+      accessorKey: "id" as const,
       cell: ({ original }: { original: Customer }) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/customers/${original.id}`)}
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(original)}
+          >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -75,14 +95,14 @@ export default function CustomersPage() {
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading customers...</div>
+    return <div className="text-slate-500">Loading customers...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading customers</div>
+    return <div className="text-danger-500">Error loading customers</div>;
   }
 
   return (
@@ -94,7 +114,12 @@ export default function CustomersPage() {
             {filteredCustomers?.length || 0} customers
           </p>
         </div>
-        <Button onClick={() => { setEditingCustomer(null); setFormOpen(true) }}>
+        <Button
+          onClick={() => {
+            setEditingCustomer(null);
+            setFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4" />
           Add Customer
         </Button>
@@ -123,7 +148,12 @@ export default function CustomersPage() {
             title="No customers found"
             description="Get started by adding your first customer."
             action={
-              <Button onClick={() => { setEditingCustomer(null); setFormOpen(true) }}>
+              <Button
+                onClick={() => {
+                  setEditingCustomer(null);
+                  setFormOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4" />
                 Add Customer
               </Button>
@@ -144,27 +174,32 @@ export default function CustomersPage() {
                 tags: data.tags ?? editingCustomer.tags,
                 is_guest: data.is_guest ?? editingCustomer.is_guest,
               },
-            })
-            return
+            });
+            return;
           }
 
           await createMutation.mutateAsync({
             ...data,
             tags: data.tags ?? [],
             is_guest: data.is_guest ?? false,
-          })
+          });
         }}
-        initialData={editingCustomer ? {
-          name: editingCustomer.name,
-          phone: editingCustomer.phone ?? undefined,
-          email: editingCustomer.email ?? undefined,
-          address: editingCustomer.address ?? undefined,
-          emergency_contact: editingCustomer.emergency_contact ?? undefined,
-          notes: editingCustomer.notes ?? undefined,
-          is_guest: editingCustomer.is_guest,
-          tags: editingCustomer.tags,
-        } : undefined}
+        initialData={
+          editingCustomer
+            ? {
+                name: editingCustomer.name,
+                phone: editingCustomer.phone ?? undefined,
+                email: editingCustomer.email ?? undefined,
+                address: editingCustomer.address ?? undefined,
+                emergency_contact:
+                  editingCustomer.emergency_contact ?? undefined,
+                notes: editingCustomer.notes ?? undefined,
+                is_guest: editingCustomer.is_guest,
+                tags: editingCustomer.tags,
+              }
+            : undefined
+        }
       />
     </div>
-  )
+  );
 }

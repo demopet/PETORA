@@ -1,72 +1,92 @@
-import { useState } from 'react'
-import { Plus, Search, Trash2, Edit } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { PetForm } from '../components/PetForm'
-import { usePets, useCreatePet, useUpdatePet, useDeletePet } from '../hooks/use-pets'
-import { useCustomers } from '@/features/customers/hooks/use-customers'
-import type { Pet } from '@/types/pet'
+import { useState } from "react";
+import { Plus, Search, Trash2, Edit, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { DataTable } from "@/components/ui/data-table";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PetForm } from "../components/PetForm";
+import {
+  usePets,
+  useCreatePet,
+  useUpdatePet,
+  useDeletePet,
+} from "../hooks/use-pets";
+import { useCustomers } from "@/features/customers/hooks/use-customers";
+import type { Pet } from "@/types/pet";
 
 interface PetsPageProps {
-  customerId?: string
+  customerId?: string;
 }
 
 export default function PetsPage({ customerId }: PetsPageProps) {
-  const [search, setSearch] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingPet, setEditingPet] = useState<Pet | null>(null)
-  const { data: pets, isLoading, error } = usePets(customerId)
-  const { data: customers } = useCustomers()
-  const createMutation = useCreatePet()
-  const updateMutation = useUpdatePet()
-  const deleteMutation = useDeletePet()
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingPet, setEditingPet] = useState<Pet | null>(null);
+  const { data: pets, isLoading, error } = usePets(customerId);
+  const { data: customers } = useCustomers();
+  const createMutation = useCreatePet();
+  const updateMutation = useUpdatePet();
+  const deleteMutation = useDeletePet();
 
-  const filteredPets = pets?.filter((pet) =>
-    pet.name.toLowerCase().includes(search.toLowerCase()) ||
-    pet.species.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredPets = pets?.filter(
+    (pet) =>
+      pet.name.toLowerCase().includes(search.toLowerCase()) ||
+      pet.species.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this pet?')) {
-      await deleteMutation.mutateAsync(id)
+    if (confirm("Are you sure you want to delete this pet?")) {
+      await deleteMutation.mutateAsync(id);
     }
-  }
+  };
 
   const handleEdit = (pet: Pet) => {
-    setEditingPet(pet)
-    setFormOpen(true)
-  }
+    setEditingPet(pet);
+    setFormOpen(true);
+  };
 
   const columns = [
     {
-      header: 'Name',
-      accessorKey: 'name' as const,
+      header: "Name",
+      accessorKey: "name" as const,
       cell: ({ original }: { original: Pet }) => (
         <div className="font-medium text-slate-900">{original.name}</div>
       ),
     },
     {
-      header: 'Species',
-      accessorKey: 'species' as const,
+      header: "Species",
+      accessorKey: "species" as const,
     },
     {
-      header: 'Breed',
-      accessorKey: 'breed' as const,
-      cell: ({ original }: { original: Pet }) => original.breed || '-',
+      header: "Breed",
+      accessorKey: "breed" as const,
+      cell: ({ original }: { original: Pet }) => original.breed || "-",
     },
     {
-      header: 'Gender',
-      accessorKey: 'gender' as const,
-      cell: ({ original }: { original: Pet }) => original.gender || '-',
+      header: "Gender",
+      accessorKey: "gender" as const,
+      cell: ({ original }: { original: Pet }) => original.gender || "-",
     },
     {
-      header: 'Actions',
-      accessorKey: 'id' as const,
+      header: "Actions",
+      accessorKey: "id" as const,
       cell: ({ original }: { original: Pet }) => (
         <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => handleEdit(original)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/pets/${original.id}`)}
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => handleEdit(original)}
+          >
             <Edit className="h-4 w-4" />
           </Button>
           <Button
@@ -79,14 +99,14 @@ export default function PetsPage({ customerId }: PetsPageProps) {
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading pets...</div>
+    return <div className="text-slate-500">Loading pets...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading pets</div>
+    return <div className="text-danger-500">Error loading pets</div>;
   }
 
   return (
@@ -98,7 +118,12 @@ export default function PetsPage({ customerId }: PetsPageProps) {
             {filteredPets?.length || 0} pets
           </p>
         </div>
-        <Button onClick={() => { setEditingPet(null); setFormOpen(true) }}>
+        <Button
+          onClick={() => {
+            setEditingPet(null);
+            setFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4" />
           Add Pet
         </Button>
@@ -127,7 +152,12 @@ export default function PetsPage({ customerId }: PetsPageProps) {
             title="No pets found"
             description="Get started by adding your first pet."
             action={
-              <Button onClick={() => { setEditingPet(null); setFormOpen(true) }}>
+              <Button
+                onClick={() => {
+                  setEditingPet(null);
+                  setFormOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4" />
                 Add Pet
               </Button>
@@ -147,8 +177,8 @@ export default function PetsPage({ customerId }: PetsPageProps) {
                 ...data,
                 customer_id: data.customer_id || editingPet.customer_id,
               },
-            })
-            return
+            });
+            return;
           }
 
           await createMutation.mutateAsync({
@@ -157,20 +187,24 @@ export default function PetsPage({ customerId }: PetsPageProps) {
             gender: data.gender || undefined,
             birth_date: data.birth_date || undefined,
             microchip_number: data.microchip_number || undefined,
-          })
+          });
         }}
-        customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
-        initialData={editingPet ? {
-          id: editingPet.id,
-          customer_id: editingPet.customer_id,
-          name: editingPet.name,
-          species: editingPet.species,
-          breed: editingPet.breed || undefined,
-          birth_date: editingPet.birth_date || undefined,
-          gender: editingPet.gender || undefined,
-          microchip_number: editingPet.microchip_number || undefined,
-        } : undefined}
+        customers={customers?.map((c) => ({ id: c.id, name: c.name })) || []}
+        initialData={
+          editingPet
+            ? {
+                id: editingPet.id,
+                customer_id: editingPet.customer_id,
+                name: editingPet.name,
+                species: editingPet.species,
+                breed: editingPet.breed || undefined,
+                birth_date: editingPet.birth_date || undefined,
+                gender: editingPet.gender || undefined,
+                microchip_number: editingPet.microchip_number || undefined,
+              }
+            : undefined
+        }
       />
     </div>
-  )
+  );
 }

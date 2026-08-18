@@ -1,55 +1,69 @@
-import { useState } from 'react'
-import { Plus, Search, Trash2 } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useMedicalRecords } from '../hooks/use-medical-records'
-import { useDeleteMedicalRecord } from '../hooks/use-medical-records'
-import type { MedicalRecord } from '@/types/medical-record'
+import { useState } from "react";
+import { Plus, Search, Trash2, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useMedicalRecords } from "../hooks/use-medical-records";
+import { useDeleteMedicalRecord } from "../hooks/use-medical-records";
+import type { MedicalRecord } from "@/types/medical-record";
 
 export default function MedicalRecordsPage() {
-  const [search, setSearch] = useState('')
-  const { data: records, isLoading, error } = useMedicalRecords()
-  const deleteMutation = useDeleteMedicalRecord()
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const { data: records, isLoading, error } = useMedicalRecords();
+  const deleteMutation = useDeleteMedicalRecord();
 
-  const filteredRecords = records?.filter((record) =>
-    record.record_number.toLowerCase().includes(search.toLowerCase()) ||
-    record.diagnosis?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredRecords = records?.filter(
+    (record) =>
+      record.record_number.toLowerCase().includes(search.toLowerCase()) ||
+      record.diagnosis?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleDelete = async (id: string) => {
-    if (confirm('Are you sure you want to delete this record?')) {
-      await deleteMutation.mutateAsync(id)
+    if (confirm("Are you sure you want to delete this record?")) {
+      await deleteMutation.mutateAsync(id);
     }
-  }
+  };
 
   const columns = [
     {
-      header: 'Record #',
-      accessorKey: 'record_number' as const,
+      header: "Record #",
+      accessorKey: "record_number" as const,
       cell: ({ original }: { original: MedicalRecord }) => (
-        <div className="font-medium text-slate-900">{original.record_number}</div>
+        <div className="font-medium text-slate-900">
+          {original.record_number}
+        </div>
       ),
     },
     {
-      header: 'Diagnosis',
-      accessorKey: 'diagnosis' as const,
-      cell: ({ original }: { original: MedicalRecord }) => original.diagnosis || '-',
+      header: "Diagnosis",
+      accessorKey: "diagnosis" as const,
+      cell: ({ original }: { original: MedicalRecord }) =>
+        original.diagnosis || "-",
     },
     {
-      header: 'Status',
-      accessorKey: 'status' as const,
+      header: "Status",
+      accessorKey: "status" as const,
       cell: ({ original }: { original: MedicalRecord }) => (
         <StatusBadge status={original.status} />
       ),
     },
     {
-      header: 'Actions',
-      accessorKey: 'id' as const,
+      header: "Actions",
+      accessorKey: "id" as const,
       cell: ({ original }: { original: MedicalRecord }) => (
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/medical-records/${original.id}`)}
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
           <Button
             variant="ghost"
             size="icon"
@@ -60,14 +74,14 @@ export default function MedicalRecordsPage() {
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading medical records...</div>
+    return <div className="text-slate-500">Loading medical records...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading medical records</div>
+    return <div className="text-danger-500">Error loading medical records</div>;
   }
 
   return (
@@ -79,7 +93,7 @@ export default function MedicalRecordsPage() {
             {filteredRecords?.length || 0} records
           </p>
         </div>
-        <Button>
+        <Button onClick={() => navigate("/medical-records/new")}>
           <Plus className="h-4 w-4" />
           New Record
         </Button>
@@ -108,7 +122,7 @@ export default function MedicalRecordsPage() {
             title="No medical records found"
             description="Get started by creating your first medical record."
             action={
-              <Button>
+              <Button onClick={() => navigate("/medical-records/new")}>
                 <Plus className="h-4 w-4" />
                 New Record
               </Button>
@@ -117,5 +131,5 @@ export default function MedicalRecordsPage() {
         }
       />
     </div>
-  )
+  );
 }

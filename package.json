@@ -19,11 +19,15 @@
     "test:rls": "vitest run tests/rls",
     "test:e2e": "playwright test",
     "test:e2e:full": "playwright test --project=chromium --project=firefox --project=webkit",
+    "test:ci": "vitest run",
     "lhci": "lhci autorun",
     "size": "size-limit",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
-    "db:seed": "tsx tests/seed/seed.ts"
+    "db:seed": "tsx tests/seed/seed.ts",
+    "prepare": "husky install",
+    "lint-staged": "lint-staged",
+    "commitlint": "commitlint --from=HEAD~1 --to=HEAD"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0",
@@ -42,6 +46,8 @@
     "zod": "^4.1.7"
   },
   "devDependencies": {
+    "@commitlint/cli": "^19.6.1",
+    "@commitlint/config-conventional": "^19.6.1",
     "@faker-js/faker": "^9.7.0",
     "@playwright/test": "^1.55.0",
     "@testing-library/jest-dom": "^6.9.1",
@@ -61,7 +67,9 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "eslint-plugin-security": "^3.0.1",
     "globals": "^17.11.0",
+    "husky": "^9.1.1",
     "jsdom": "^29.1.1",
+    "lint-staged": "^15.0.0",
     "msw": "^2.7.9",
     "prettier": "^3.5.3",
     "tailwindcss-animate": "^1.0.7",

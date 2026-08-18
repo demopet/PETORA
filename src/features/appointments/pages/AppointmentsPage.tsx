@@ -1,65 +1,86 @@
-import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { AppointmentForm } from '../components/AppointmentForm'
-import { useAppointments, useCreateAppointment } from '../hooks/use-appointments'
-import { useCustomers } from '@/features/customers/hooks/use-customers'
-import { usePets } from '@/features/pets/hooks/use-pets'
-import type { Appointment } from '@/types/appointment'
+import { useState } from "react";
+import { Plus, Search, Eye } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AppointmentForm } from "../components/AppointmentForm";
+import {
+  useAppointments,
+  useCreateAppointment,
+} from "../hooks/use-appointments";
+import { useCustomers } from "@/features/customers/hooks/use-customers";
+import { usePets } from "@/features/pets/hooks/use-pets";
+import type { Appointment } from "@/types/appointment";
 
 export default function AppointmentsPage() {
-  const [search, setSearch] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
-  const { data: appointments, isLoading, error } = useAppointments()
-  const { data: customers } = useCustomers()
-  const { data: pets } = usePets()
-  const createAppointmentMutation = useCreateAppointment()
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const { data: appointments, isLoading, error } = useAppointments();
+  const { data: customers } = useCustomers();
+  const { data: pets } = usePets();
+  const createAppointmentMutation = useCreateAppointment();
 
-  const filteredAppointments = appointments?.filter((apt) =>
-    apt.complaint?.toLowerCase().includes(search.toLowerCase()) ||
-    apt.customer_id.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredAppointments = appointments?.filter(
+    (apt) =>
+      apt.complaint?.toLowerCase().includes(search.toLowerCase()) ||
+      apt.customer_id.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const columns = [
     {
-      header: 'Date',
-      accessorKey: 'appointment_date' as const,
+      header: "Date",
+      accessorKey: "appointment_date" as const,
     },
     {
-      header: 'Time',
-      accessorKey: 'appointment_time' as const,
+      header: "Time",
+      accessorKey: "appointment_time" as const,
     },
     {
-      header: 'Customer',
-      accessorKey: 'customer_id' as const,
+      header: "Customer",
+      accessorKey: "customer_id" as const,
       cell: ({ original }: { original: Appointment }) => (
         <div className="font-medium text-slate-900">{original.customer_id}</div>
       ),
     },
     {
-      header: 'Status',
-      accessorKey: 'status' as const,
+      header: "Status",
+      accessorKey: "status" as const,
       cell: ({ original }: { original: Appointment }) => (
         <StatusBadge status={original.status} />
       ),
     },
     {
-      header: 'Queue',
-      accessorKey: 'queue_number' as const,
-      cell: ({ original }: { original: Appointment }) => original.queue_number || '-',
+      header: "Queue",
+      accessorKey: "queue_number" as const,
+      cell: ({ original }: { original: Appointment }) =>
+        original.queue_number || "-",
     },
-  ]
+    {
+      header: "Actions",
+      accessorKey: "id" as const,
+      cell: ({ original }: { original: Appointment }) => (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => navigate(`/appointments/${original.id}`)}
+          title="View Details"
+        >
+          <Eye className="h-4 w-4" />
+        </Button>
+      ),
+    },
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading appointments...</div>
+    return <div className="text-slate-500">Loading appointments...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading appointments</div>
+    return <div className="text-danger-500">Error loading appointments</div>;
   }
 
   return (
@@ -119,12 +140,18 @@ export default function AppointmentsPage() {
             complaint: data.complaint || undefined,
             notes: data.notes || undefined,
             is_from_portal: false,
-          })
+          });
         }}
-        customers={customers?.map(c => ({ id: c.id, name: c.name })) || []}
-        pets={pets?.map(p => ({ id: p.id, name: p.name, customer_id: p.customer_id })) || []}
+        customers={customers?.map((c) => ({ id: c.id, name: c.name })) || []}
+        pets={
+          pets?.map((p) => ({
+            id: p.id,
+            name: p.name,
+            customer_id: p.customer_id,
+          })) || []
+        }
         doctors={[]}
       />
     </div>
-  )
+  );
 }
