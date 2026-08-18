@@ -38,6 +38,15 @@ function mapAuthError(error: {
   return new Error(message);
 }
 
+/**
+ * Authenticate a user with username and PIN.
+ *
+ * @param credentials - Login credentials containing username and 6-digit PIN
+ * @returns Login response with user data and session token
+ * @throws {Error} INVALID_CREDENTIALS when username/PIN is incorrect
+ * @throws {Error} ACCOUNT_LOCKED when account is locked due to failed attempts
+ * @throws {Error} ACCOUNT_INACTIVE when account is deactivated
+ */
 export async function login(
   credentials: LoginCredentials,
 ): Promise<LoginResponse> {
@@ -55,6 +64,12 @@ export async function login(
   return data as LoginResponse;
 }
 
+/**
+ * Invalidate the current session.
+ *
+ * @param sessionToken - Active session token to invalidate
+ * @throws {Error} When logout fails
+ */
 export async function logout(sessionToken: string): Promise<void> {
   const { error } = await supabase.rpc("fn_auth_logout", {
     p_session_token: sessionToken,
@@ -65,6 +80,14 @@ export async function logout(sessionToken: string): Promise<void> {
   }
 }
 
+/**
+ * Change the current user's PIN.
+ *
+ * @param userId - ID of the user changing their PIN
+ * @param oldPin - Current 6-digit PIN
+ * @param newPin - New 6-digit PIN
+ * @throws {Error} INVALID_OLD_PIN when current PIN is incorrect
+ */
 export async function changePin(
   userId: string,
   oldPin: string,
@@ -83,6 +106,15 @@ export async function changePin(
   }
 }
 
+/**
+ * Reset a user's PIN (admin/owner only).
+ *
+ * @param callerUserId - ID of the admin/owner performing the reset
+ * @param targetUserId - ID of the user whose PIN is being reset
+ * @param newPin - New 6-digit PIN
+ * @throws {Error} VALIDATION_ERROR when new PIN format is invalid
+ * @throws {Error} FORBIDDEN when caller lacks permission
+ */
 export async function resetPin(
   callerUserId: string,
   targetUserId: string,
@@ -103,6 +135,14 @@ export async function resetPin(
   }
 }
 
+/**
+ * Create a new user account.
+ *
+ * @param input - User creation data including username, PIN, role, and full name
+ * @param callerUserId - ID of the user creating the account (for audit)
+ * @throws {Error} USERNAME_ALREADY_EXISTS when username is taken
+ * @throws {Error} FORBIDDEN when caller lacks permission
+ */
 export async function createUser(
   input: CreateUserInput,
   callerUserId: string,

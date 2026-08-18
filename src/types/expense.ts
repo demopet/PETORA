@@ -1,6 +1,6 @@
-import type { BaseEntity, UUID } from './base';
+import type { BaseEntity, UUID } from "./base";
 
-export type ExpenseStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'REVERSED';
+export type ExpenseStatus = "PENDING" | "APPROVED" | "REJECTED" | "REVERSED";
 
 export interface ExpenseCategory extends BaseEntity {
   name: string;

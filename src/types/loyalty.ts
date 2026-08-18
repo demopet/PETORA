@@ -1,7 +1,7 @@
-import type { BaseEntity, UUID, Timestamp } from './base';
+import type { BaseEntity, UUID, Timestamp } from "./base";
 
-export type LoyaltyTier = 'BRONZE' | 'SILVER' | 'GOLD' | 'PLATINUM';
-export type LoyaltyTransactionType = 'EARN' | 'REDEEM' | 'EXPIRE' | 'ADJUST';
+export type LoyaltyTier = "BRONZE" | "SILVER" | "GOLD" | "PLATINUM";
+export type LoyaltyTransactionType = "EARN" | "REDEEM" | "EXPIRE" | "ADJUST";
 
 export interface LoyaltyTierConfig extends BaseEntity {
   tier_name: LoyaltyTier;

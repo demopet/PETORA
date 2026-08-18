@@ -1,115 +1,128 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
-import type { LoyaltyMember, LoyaltyTransaction, LoyaltyTierConfig } from '@/types/loyalty'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/client";
+import type {
+  LoyaltyMember,
+  LoyaltyTransaction,
+  LoyaltyTierConfig,
+} from "@/types/loyalty";
 
 export function useLoyaltyMembers() {
   return useQuery({
-    queryKey: ['loyalty-members'],
+    queryKey: ["loyalty-members"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('loyalty_members')
-        .select('*, loyalty_tiers(*)')
-        .order('total_points', { ascending: false })
+        .from("loyalty_members")
+        .select("*, loyalty_tiers(*)")
+        .order("total_points", { ascending: false });
 
-      if (error) throw error
-      return data as (LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig })[]
+      if (error) throw error;
+      return data as (LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig })[];
     },
-  })
+  });
 }
 
 export function useLoyaltyMember(customerId: string) {
   return useQuery({
-    queryKey: ['loyalty-members', customerId],
+    queryKey: ["loyalty-members", customerId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('loyalty_members')
-        .select('*, loyalty_tiers(*)')
-        .eq('customer_id', customerId)
-        .single()
+        .from("loyalty_members")
+        .select("*, loyalty_tiers(*)")
+        .eq("customer_id", customerId)
+        .single();
 
-      if (error) throw error
-      return data as LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig }
+      if (error) throw error;
+      return data as LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig };
     },
     enabled: !!customerId,
-  })
+  });
 }
 
 export function useLoyaltyTransactions(memberId: string) {
   return useQuery({
-    queryKey: ['loyalty-transactions', memberId],
+    queryKey: ["loyalty-transactions", memberId],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('loyalty_transactions')
-        .select('*')
-        .eq('member_id', memberId)
-        .order('created_at', { ascending: false })
+        .from("loyalty_transactions")
+        .select("*")
+        .eq("member_id", memberId)
+        .order("created_at", { ascending: false });
 
-      if (error) throw error
-      return data as LoyaltyTransaction[]
+      if (error) throw error;
+      return data as LoyaltyTransaction[];
     },
     enabled: !!memberId,
-  })
+  });
 }
 
 export function useEarnLoyaltyPoints() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ memberId, points, invoiceId, description }: {
-      memberId: string
-      points: number
-      invoiceId?: string
-      description?: string
+    mutationFn: async ({
+      memberId,
+      points,
+      invoiceId,
+      description,
+    }: {
+      memberId: string;
+      points: number;
+      invoiceId?: string;
+      description?: string;
     }) => {
       const { data, error } = await supabase
-        .from('loyalty_transactions')
+        .from("loyalty_transactions")
         .insert({
           member_id: memberId,
-          transaction_type: 'EARN',
+          transaction_type: "EARN",
           points,
           invoice_id: invoiceId,
           description,
         })
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data as LoyaltyTransaction
+      if (error) throw error;
+      return data as LoyaltyTransaction;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['loyalty-members'] })
-      queryClient.invalidateQueries({ queryKey: ['loyalty-transactions'] })
+      queryClient.invalidateQueries({ queryKey: ["loyalty-members"] });
+      queryClient.invalidateQueries({ queryKey: ["loyalty-transactions"] });
     },
-  })
+  });
 }
 
 export function useRedeemLoyaltyPoints() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ memberId, points, invoiceId }: {
-      memberId: string
-      points: number
-      invoiceId?: string
+    mutationFn: async ({
+      memberId,
+      points,
+      invoiceId,
+    }: {
+      memberId: string;
+      points: number;
+      invoiceId?: string;
     }) => {
       const { data, error } = await supabase
-        .from('loyalty_transactions')
+        .from("loyalty_transactions")
         .insert({
           member_id: memberId,
-          transaction_type: 'REDEEM',
+          transaction_type: "REDEEM",
           points: -points,
           invoice_id: invoiceId,
-          description: 'Redeemed points',
+          description: "Redeemed points",
         })
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data as LoyaltyTransaction
+      if (error) throw error;
+      return data as LoyaltyTransaction;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['loyalty-members'] })
-      queryClient.invalidateQueries({ queryKey: ['loyalty-transactions'] })
+      queryClient.invalidateQueries({ queryKey: ["loyalty-members"] });
+      queryClient.invalidateQueries({ queryKey: ["loyalty-transactions"] });
     },
-  })
+  });
 }

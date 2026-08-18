@@ -1,7 +1,8 @@
-import type { BaseEntity, UUID, Timestamp } from './base';
+import type { BaseEntity, UUID, Timestamp } from "./base";
 
-export type PromotionType = 'PERCENTAGE' | 'FIXED' | 'BUNDLE' | 'HAPPY_HOUR' | 'BIRTHDAY';
-export type PromotionStatus = 'ACTIVE' | 'EXPIRED' | 'CANCELLED';
+export type PromotionType =
+  "PERCENTAGE" | "FIXED" | "BUNDLE" | "HAPPY_HOUR" | "BIRTHDAY";
+export type PromotionStatus = "ACTIVE" | "EXPIRED" | "CANCELLED";
 
 export interface Promotion extends BaseEntity {
   code: string | null;

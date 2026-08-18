@@ -8,14 +8,18 @@ export default function PortalLoyaltyPage() {
         <div className="mt-4 space-y-2">
           <div className="rounded-xl bg-slate-50 p-3">
             <p className="font-medium">Platinum Member</p>
-            <p className="text-sm text-slate-600">Bonus konsultasi 10% untuk bulan ini.</p>
+            <p className="text-sm text-slate-600">
+              Bonus konsultasi 10% untuk bulan ini.
+            </p>
           </div>
           <div className="rounded-xl bg-slate-50 p-3">
             <p className="font-medium">Redeem 1,000 poin</p>
-            <p className="text-sm text-slate-600">Diskon 10% untuk layanan grooming.</p>
+            <p className="text-sm text-slate-600">
+              Diskon 10% untuk layanan grooming.
+            </p>
           </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

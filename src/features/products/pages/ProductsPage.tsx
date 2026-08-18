@@ -1,43 +1,49 @@
-import { useState } from 'react'
-import { Plus, Search, Trash2, Edit } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { ProductForm } from '../components/ProductForm'
-import { useProducts, useCreateProduct, useUpdateProduct, useArchiveProduct } from '../hooks/use-products'
-import type { Product } from '@/types/product'
+import { useState } from "react";
+import { Plus, Search, Trash2, Edit } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { ProductForm } from "../components/ProductForm";
+import {
+  useProducts,
+  useCreateProduct,
+  useUpdateProduct,
+  useArchiveProduct,
+} from "../hooks/use-products";
+import type { Product } from "@/types/product";
 
 export default function ProductsPage() {
-  const [search, setSearch] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null)
-  const { data: products, isLoading, error } = useProducts()
-  const createMutation = useCreateProduct()
-  const updateMutation = useUpdateProduct()
-  const archiveMutation = useArchiveProduct()
+  const [search, setSearch] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const { data: products, isLoading, error } = useProducts();
+  const createMutation = useCreateProduct();
+  const updateMutation = useUpdateProduct();
+  const archiveMutation = useArchiveProduct();
 
-  const filteredProducts = products?.filter((product) =>
-    product.name.toLowerCase().includes(search.toLowerCase()) ||
-    product.sku.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredProducts = products?.filter(
+    (product) =>
+      product.name.toLowerCase().includes(search.toLowerCase()) ||
+      product.sku.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleArchive = async (id: string) => {
-    if (confirm('Are you sure you want to archive this product?')) {
-      await archiveMutation.mutateAsync(id)
+    if (confirm("Are you sure you want to archive this product?")) {
+      await archiveMutation.mutateAsync(id);
     }
-  }
+  };
 
   const handleEdit = (product: Product) => {
-    setEditingProduct(product)
-    setFormOpen(true)
-  }
+    setEditingProduct(product);
+    setFormOpen(true);
+  };
 
   const columns = [
     {
-      header: 'Name',
-      accessorKey: 'name' as const,
+      header: "Name",
+      accessorKey: "name" as const,
       cell: ({ original }: { original: Product }) => (
         <div>
           <div className="font-medium text-slate-900">{original.name}</div>
@@ -46,32 +52,33 @@ export default function ProductsPage() {
       ),
     },
     {
-      header: 'Category',
-      accessorKey: 'category_id' as const,
-      cell: ({ original }: { original: Product }) => original.category_id || '-',
+      header: "Category",
+      accessorKey: "category_id" as const,
+      cell: ({ original }: { original: Product }) =>
+        original.category_id || "-",
     },
     {
-      header: 'Price',
-      accessorKey: 'selling_price' as const,
+      header: "Price",
+      accessorKey: "selling_price" as const,
       cell: ({ original }: { original: Product }) => (
         <div className="font-medium">
-          {new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
+          {new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
             minimumFractionDigits: 0,
           }).format(original.selling_price)}
         </div>
       ),
     },
     {
-      header: 'Stock',
-      accessorKey: 'stock_quantity' as const,
+      header: "Stock",
+      accessorKey: "stock_quantity" as const,
       cell: ({ original }: { original: Product }) => (
         <div
           className={
             original.stock_quantity <= original.stock_minimum
-              ? 'text-danger-600 font-medium'
-              : ''
+              ? "text-danger-600 font-medium"
+              : ""
           }
         >
           {original.stock_quantity}
@@ -79,15 +86,15 @@ export default function ProductsPage() {
       ),
     },
     {
-      header: 'Status',
-      accessorKey: 'status' as const,
+      header: "Status",
+      accessorKey: "status" as const,
       cell: ({ original }: { original: Product }) => (
         <StatusBadge status={original.status} />
       ),
     },
     {
-      header: 'Actions',
-      accessorKey: 'id' as const,
+      header: "Actions",
+      accessorKey: "id" as const,
       cell: ({ original }: { original: Product }) => (
         <div className="flex items-center gap-2">
           <Button
@@ -107,14 +114,14 @@ export default function ProductsPage() {
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading products...</div>
+    return <div className="text-slate-500">Loading products...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading products</div>
+    return <div className="text-danger-500">Error loading products</div>;
   }
 
   return (
@@ -126,7 +133,12 @@ export default function ProductsPage() {
             {filteredProducts?.length || 0} products
           </p>
         </div>
-        <Button onClick={() => { setEditingProduct(null); setFormOpen(true) }}>
+        <Button
+          onClick={() => {
+            setEditingProduct(null);
+            setFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4" />
           Add Product
         </Button>
@@ -155,7 +167,12 @@ export default function ProductsPage() {
             title="No products found"
             description="Get started by adding your first product."
             action={
-              <Button onClick={() => { setEditingProduct(null); setFormOpen(true) }}>
+              <Button
+                onClick={() => {
+                  setEditingProduct(null);
+                  setFormOpen(true);
+                }}
+              >
                 <Plus className="h-4 w-4" />
                 Add Product
               </Button>
@@ -176,8 +193,8 @@ export default function ProductsPage() {
                 category_id: data.category_id || undefined,
                 supplier_id: data.supplier_id || undefined,
               },
-            })
-            return
+            });
+            return;
           }
 
           await createMutation.mutateAsync({
@@ -187,26 +204,30 @@ export default function ProductsPage() {
             barcode: data.barcode || undefined,
             description: data.description || undefined,
             expiry_date: data.expiry_date || undefined,
-          })
+          });
         }}
         categories={[]}
         suppliers={[]}
-        initialData={editingProduct ? {
-          id: editingProduct.id,
-          sku: editingProduct.sku,
-          name: editingProduct.name,
-          category_id: editingProduct.category_id || undefined,
-          supplier_id: editingProduct.supplier_id || undefined,
-          barcode: editingProduct.barcode || undefined,
-          description: editingProduct.description || undefined,
-          purchase_price: editingProduct.purchase_price,
-          selling_price: editingProduct.selling_price,
-          stock_quantity: editingProduct.stock_quantity,
-          stock_minimum: editingProduct.stock_minimum,
-          stock_maximum: editingProduct.stock_maximum,
-          expiry_date: editingProduct.expiry_date || undefined,
-        } : undefined}
+        initialData={
+          editingProduct
+            ? {
+                id: editingProduct.id,
+                sku: editingProduct.sku,
+                name: editingProduct.name,
+                category_id: editingProduct.category_id || undefined,
+                supplier_id: editingProduct.supplier_id || undefined,
+                barcode: editingProduct.barcode || undefined,
+                description: editingProduct.description || undefined,
+                purchase_price: editingProduct.purchase_price,
+                selling_price: editingProduct.selling_price,
+                stock_quantity: editingProduct.stock_quantity,
+                stock_minimum: editingProduct.stock_minimum,
+                stock_maximum: editingProduct.stock_maximum,
+                expiry_date: editingProduct.expiry_date || undefined,
+              }
+            : undefined
+        }
       />
     </div>
-  )
+  );
 }

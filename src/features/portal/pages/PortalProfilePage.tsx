@@ -14,10 +14,14 @@ export default function PortalProfilePage() {
         </div>
 
         <div className="mt-5 space-y-3 text-sm text-slate-600">
-          <div className="rounded-xl bg-slate-50 p-3">Nomor telepon: +62 812-3456-7890</div>
-          <div className="rounded-xl bg-slate-50 p-3">Alamat: Jl. Merdeka No. 10, Jakarta</div>
+          <div className="rounded-xl bg-slate-50 p-3">
+            Nomor telepon: +62 812-3456-7890
+          </div>
+          <div className="rounded-xl bg-slate-50 p-3">
+            Alamat: Jl. Merdeka No. 10, Jakarta
+          </div>
         </div>
       </div>
     </div>
-  )
+  );
 }

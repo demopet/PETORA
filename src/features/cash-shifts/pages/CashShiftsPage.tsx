@@ -1,93 +1,93 @@
-import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useCashShifts } from '../hooks/use-cash-shifts'
-import type { CashShift } from '@/types/invoice'
+import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useCashShifts } from "../hooks/use-cash-shifts";
+import type { CashShift } from "@/types/invoice";
 
 export default function CashShiftsPage() {
-  const [search, setSearch] = useState('')
-  const { data: shifts, isLoading, error } = useCashShifts()
+  const [search, setSearch] = useState("");
+  const { data: shifts, isLoading, error } = useCashShifts();
 
   const filteredShifts = shifts?.filter((shift) =>
-    shift.id.toLowerCase().includes(search.toLowerCase())
-  )
+    shift.id.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const columns = [
     {
-      header: 'Open Time',
-      accessorKey: 'open_time' as const,
+      header: "Open Time",
+      accessorKey: "open_time" as const,
       cell: ({ original }: { original: CashShift }) => (
         <div className="text-sm">
-          {new Date(original.open_time).toLocaleString('id-ID')}
+          {new Date(original.open_time).toLocaleString("id-ID")}
         </div>
       ),
     },
     {
-      header: 'Close Time',
-      accessorKey: 'close_time' as const,
+      header: "Close Time",
+      accessorKey: "close_time" as const,
       cell: ({ original }: { original: CashShift }) =>
         original.close_time
-          ? new Date(original.close_time).toLocaleString('id-ID')
-          : '-',
+          ? new Date(original.close_time).toLocaleString("id-ID")
+          : "-",
     },
     {
-      header: 'Opening Cash',
-      accessorKey: 'opening_cash' as const,
+      header: "Opening Cash",
+      accessorKey: "opening_cash" as const,
       cell: ({ original }: { original: CashShift }) => (
         <div className="font-medium">
-          {new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
+          {new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
             minimumFractionDigits: 0,
           }).format(original.opening_cash)}
         </div>
       ),
     },
     {
-      header: 'Closing Cash',
-      accessorKey: 'closing_cash' as const,
+      header: "Closing Cash",
+      accessorKey: "closing_cash" as const,
       cell: ({ original }: { original: CashShift }) =>
         original.closing_cash !== null ? (
           <div className="font-medium">
-            {new Intl.NumberFormat('id-ID', {
-              style: 'currency',
-              currency: 'IDR',
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
               minimumFractionDigits: 0,
             }).format(original.closing_cash)}
           </div>
         ) : (
-          '-'
+          "-"
         ),
     },
     {
-      header: 'Difference',
-      accessorKey: 'difference' as const,
+      header: "Difference",
+      accessorKey: "difference" as const,
       cell: ({ original }: { original: CashShift }) =>
         original.difference !== null ? (
           <div
-            className={`font-medium ${original.difference >= 0 ? 'text-success-600' : 'text-danger-600'}`}
+            className={`font-medium ${original.difference >= 0 ? "text-success-600" : "text-danger-600"}`}
           >
-            {new Intl.NumberFormat('id-ID', {
-              style: 'currency',
-              currency: 'IDR',
+            {new Intl.NumberFormat("id-ID", {
+              style: "currency",
+              currency: "IDR",
               minimumFractionDigits: 0,
             }).format(original.difference)}
           </div>
         ) : (
-          '-'
+          "-"
         ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading cash shifts...</div>
+    return <div className="text-slate-500">Loading cash shifts...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading cash shifts</div>
+    return <div className="text-danger-500">Error loading cash shifts</div>;
   }
 
   return (
@@ -137,5 +137,5 @@ export default function CashShiftsPage() {
         }
       />
     </div>
-  )
+  );
 }

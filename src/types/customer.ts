@@ -1,6 +1,6 @@
-import type { SoftDeletable } from './base';
+import type { SoftDeletable } from "./base";
 
-export type CustomerTag = 'VIP' | 'REGULAR' | 'NEW' | 'BLACKLIST';
+export type CustomerTag = "VIP" | "REGULAR" | "NEW" | "BLACKLIST";
 
 export interface Customer extends SoftDeletable {
   name: string;

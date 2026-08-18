@@ -1,7 +1,7 @@
-import { z } from 'zod';
-import { uuidSchema } from './base';
+import { z } from "zod";
+import { uuidSchema } from "./base";
 
-export const medicalRecordStatusSchema = z.enum(['OPEN', 'CLOSED']);
+export const medicalRecordStatusSchema = z.enum(["OPEN", "CLOSED"]);
 
 export const createMedicalRecordSchema = z.object({
   appointment_id: uuidSchema,
@@ -22,5 +22,9 @@ export const createMedicalRecordSchema = z.object({
 
 export const updateMedicalRecordSchema = createMedicalRecordSchema.partial();
 
-export type CreateMedicalRecordInput = z.infer<typeof createMedicalRecordSchema>;
-export type UpdateMedicalRecordInput = z.infer<typeof updateMedicalRecordSchema>;
+export type CreateMedicalRecordInput = z.infer<
+  typeof createMedicalRecordSchema
+>;
+export type UpdateMedicalRecordInput = z.infer<
+  typeof updateMedicalRecordSchema
+>;

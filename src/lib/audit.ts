@@ -1,4 +1,4 @@
-import { supabase } from './supabase/client';
+import { supabase } from "./supabase/client";
 
 export async function logAudit(params: {
   user_id: string;
@@ -10,7 +10,7 @@ export async function logAudit(params: {
   ip_address?: string;
   user_agent?: string;
 }) {
-  await supabase.from('audit_logs').insert({
+  await supabase.from("audit_logs").insert({
     ...params,
     created_at: new Date().toISOString(),
   });

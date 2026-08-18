@@ -1,7 +1,12 @@
-import { z } from 'zod';
-import { uuidSchema, dateSchema, timeSchema } from './base';
+import { z } from "zod";
+import { uuidSchema, dateSchema, timeSchema } from "./base";
 
-export const appointmentStatusSchema = z.enum(['WAITING', 'IN_PROGRESS', 'DONE', 'CANCELLED']);
+export const appointmentStatusSchema = z.enum([
+  "WAITING",
+  "IN_PROGRESS",
+  "DONE",
+  "CANCELLED",
+]);
 
 export const createAppointmentSchema = z.object({
   customer_id: uuidSchema,
@@ -19,4 +24,6 @@ export const updateAppointmentStatusSchema = z.object({
 });
 
 export type CreateAppointmentInput = z.infer<typeof createAppointmentSchema>;
-export type UpdateAppointmentStatusInput = z.infer<typeof updateAppointmentStatusSchema>;
+export type UpdateAppointmentStatusInput = z.infer<
+  typeof updateAppointmentStatusSchema
+>;

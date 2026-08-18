@@ -1,6 +1,7 @@
-import type { SoftDeletable, BaseEntity, UUID } from './base';
+import type { SoftDeletable, BaseEntity, UUID } from "./base";
 
-export type GroomingBookingStatus = 'BOOKED' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+export type GroomingBookingStatus =
+  "BOOKED" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 
 export interface GroomingService extends SoftDeletable {
   name: string;

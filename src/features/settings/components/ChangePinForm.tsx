@@ -1,25 +1,25 @@
-import { useState, useEffect, type FormEvent } from 'react'
+import { useState, useEffect, type FormEvent } from "react";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { FormField } from '@/components/ui/form-field'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { FormField } from "@/components/ui/form-field";
 
 interface ChangePinFormProps {
-  open: boolean
-  onOpenChange: (_open: boolean) => void
-  onSubmit: (_oldPin: string, _newPin: string) => void
-  isLoading?: boolean
-  error?: string | null
+  open: boolean;
+  onOpenChange: (_open: boolean) => void;
+  onSubmit: (_oldPin: string, _newPin: string) => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
-const PIN_LENGTH = 6
-const PIN_REGEX = /^\d{6}$/
+const PIN_LENGTH = 6;
+const PIN_REGEX = /^\d{6}$/;
 
 export function ChangePinForm({
   open,
@@ -28,58 +28,55 @@ export function ChangePinForm({
   isLoading = false,
   error = null,
 }: ChangePinFormProps) {
-  const [oldPin, setOldPin] = useState('')
-  const [newPin, setNewPin] = useState('')
-  const [confirmPin, setConfirmPin] = useState('')
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  const [oldPin, setOldPin] = useState("");
+  const [newPin, setNewPin] = useState("");
+  const [confirmPin, setConfirmPin] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (!open) {
-      setOldPin('')
-      setNewPin('')
-      setConfirmPin('')
-      setFieldErrors({})
+      setOldPin("");
+      setNewPin("");
+      setConfirmPin("");
+      setFieldErrors({});
     }
-  }, [open])
+  }, [open]);
 
   const validate = (): boolean => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     if (!oldPin) {
-      errors.oldPin = 'PIN lama wajib diisi'
+      errors.oldPin = "PIN lama wajib diisi";
     } else if (!PIN_REGEX.test(oldPin)) {
-      errors.oldPin = `PIN lama harus ${PIN_LENGTH} digit`
+      errors.oldPin = `PIN lama harus ${PIN_LENGTH} digit`;
     }
 
     if (!newPin) {
-      errors.newPin = 'PIN baru wajib diisi'
+      errors.newPin = "PIN baru wajib diisi";
     } else if (!PIN_REGEX.test(newPin)) {
-      errors.newPin = `PIN baru harus ${PIN_LENGTH} digit`
+      errors.newPin = `PIN baru harus ${PIN_LENGTH} digit`;
     }
 
     if (!confirmPin) {
-      errors.confirmPin = 'Konfirmasi PIN wajib diisi'
+      errors.confirmPin = "Konfirmasi PIN wajib diisi";
     } else if (confirmPin !== newPin) {
-      errors.confirmPin = 'Konfirmasi PIN tidak cocok'
+      errors.confirmPin = "Konfirmasi PIN tidak cocok";
     }
 
-    setFieldErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setFieldErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = (e: FormEvent) => {
-    e.preventDefault()
-    if (!validate()) return
-    onSubmit(oldPin, newPin)
-  }
+    e.preventDefault();
+    if (!validate()) return;
+    onSubmit(oldPin, newPin);
+  };
 
-  const handlePinChange = (
-    setter: (_value: string) => void,
-    value: string,
-  ) => {
-    const sanitized = value.replace(/\D/g, '').slice(0, PIN_LENGTH)
-    setter(sanitized)
-  }
+  const handlePinChange = (setter: (_value: string) => void, value: string) => {
+    const sanitized = value.replace(/\D/g, "").slice(0, PIN_LENGTH);
+    setter(sanitized);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -154,11 +151,11 @@ export function ChangePinForm({
               Batal
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Memproses...' : 'Ganti PIN'}
+              {isLoading ? "Memproses..." : "Ganti PIN"}
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,8 +1,21 @@
-import { z } from 'zod';
-import { uuidSchema } from './base';
+import { z } from "zod";
+import { uuidSchema } from "./base";
 
-export const invoiceTypeSchema = z.enum(['POS', 'CLINICAL', 'PET_HOTEL', 'GROOMING', 'MIXED']);
-export const paymentMethodSchema = z.enum(['CASH', 'QRIS', 'TRANSFER', 'E_WALLET', 'CREDIT_CARD', 'MIXED']);
+export const invoiceTypeSchema = z.enum([
+  "POS",
+  "CLINICAL",
+  "PET_HOTEL",
+  "GROOMING",
+  "MIXED",
+]);
+export const paymentMethodSchema = z.enum([
+  "CASH",
+  "QRIS",
+  "TRANSFER",
+  "E_WALLET",
+  "CREDIT_CARD",
+  "MIXED",
+]);
 
 export const invoiceItemSchema = z.object({
   item_type: z.string(),

@@ -1,9 +1,11 @@
-import type { SoftDeletable, BaseEntity, UUID, Timestamp } from './base';
+import type { SoftDeletable, BaseEntity, UUID, Timestamp } from "./base";
 
-export type RoomStatus = 'AVAILABLE' | 'RESERVED' | 'OCCUPIED' | 'MAINTENANCE' | 'INACTIVE';
-export type RoomCleanliness = 'CLEAN' | 'DIRTY' | 'UNDER_CLEANING';
-export type PetHotelBookingStatus = 'BOOKED' | 'CHECKED_IN' | 'CHECKED_OUT' | 'CANCELLED';
-export type PetHotelLogType = 'FEEDING' | 'MEDICINE' | 'NOTE';
+export type RoomStatus =
+  "AVAILABLE" | "RESERVED" | "OCCUPIED" | "MAINTENANCE" | "INACTIVE";
+export type RoomCleanliness = "CLEAN" | "DIRTY" | "UNDER_CLEANING";
+export type PetHotelBookingStatus =
+  "BOOKED" | "CHECKED_IN" | "CHECKED_OUT" | "CANCELLED";
+export type PetHotelLogType = "FEEDING" | "MEDICINE" | "NOTE";
 
 export interface Room extends SoftDeletable {
   name: string;

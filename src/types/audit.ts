@@ -1,4 +1,4 @@
-import type { BaseEntity, UUID } from './base';
+import type { BaseEntity, UUID } from "./base";
 
 export interface AuditLog extends BaseEntity {
   user_id: UUID | null;

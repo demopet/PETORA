@@ -1,6 +1,6 @@
-import type { BaseEntity, UUID, Timestamp } from './base';
+import type { BaseEntity, UUID, Timestamp } from "./base";
 
-export type UserRole = 'OWNER' | 'ADMIN' | 'DOKTER' | 'KASIR' | 'CUSTOMER';
+export type UserRole = "OWNER" | "ADMIN" | "DOKTER" | "KASIR" | "CUSTOMER";
 
 export interface User extends BaseEntity {
   username: string;
@@ -21,7 +21,7 @@ export interface LoginCredentials {
 }
 
 export interface LoginResponse {
-  user: Omit<User, 'pin_hash'>;
+  user: Omit<User, "pin_hash">;
   session_token: string;
 }
 

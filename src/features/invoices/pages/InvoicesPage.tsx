@@ -1,71 +1,74 @@
-import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useInvoices } from '../hooks/use-invoices'
-import type { Invoice } from '@/types/invoice'
+import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useInvoices } from "../hooks/use-invoices";
+import type { Invoice } from "@/types/invoice";
 
 export default function InvoicesPage() {
-  const [search, setSearch] = useState('')
-  const { data: invoices, isLoading, error } = useInvoices()
+  const [search, setSearch] = useState("");
+  const { data: invoices, isLoading, error } = useInvoices();
 
-  const filteredInvoices = invoices?.filter((inv) =>
-    inv.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
-    inv.customer_id?.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredInvoices = invoices?.filter(
+    (inv) =>
+      inv.invoice_number.toLowerCase().includes(search.toLowerCase()) ||
+      inv.customer_id?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const columns = [
     {
-      header: 'Invoice #',
-      accessorKey: 'invoice_number' as const,
+      header: "Invoice #",
+      accessorKey: "invoice_number" as const,
       cell: ({ original }: { original: Invoice }) => (
-        <div className="font-medium text-slate-900">{original.invoice_number}</div>
+        <div className="font-medium text-slate-900">
+          {original.invoice_number}
+        </div>
       ),
     },
     {
-      header: 'Type',
-      accessorKey: 'invoice_type' as const,
+      header: "Type",
+      accessorKey: "invoice_type" as const,
     },
     {
-      header: 'Total',
-      accessorKey: 'total_amount' as const,
+      header: "Total",
+      accessorKey: "total_amount" as const,
       cell: ({ original }: { original: Invoice }) => (
         <div className="font-medium">
-          {new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
+          {new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
             minimumFractionDigits: 0,
           }).format(original.total_amount)}
         </div>
       ),
     },
     {
-      header: 'Status',
-      accessorKey: 'status' as const,
+      header: "Status",
+      accessorKey: "status" as const,
       cell: ({ original }: { original: Invoice }) => (
         <StatusBadge status={original.status} />
       ),
     },
     {
-      header: 'Date',
-      accessorKey: 'created_at' as const,
+      header: "Date",
+      accessorKey: "created_at" as const,
       cell: ({ original }: { original: Invoice }) => (
         <div className="text-sm text-slate-500">
-          {new Date(original.created_at).toLocaleDateString('id-ID')}
+          {new Date(original.created_at).toLocaleDateString("id-ID")}
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading invoices...</div>
+    return <div className="text-slate-500">Loading invoices...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading invoices</div>
+    return <div className="text-danger-500">Error loading invoices</div>;
   }
 
   return (
@@ -115,5 +118,5 @@ export default function InvoicesPage() {
         }
       />
     </div>
-  )
+  );
 }

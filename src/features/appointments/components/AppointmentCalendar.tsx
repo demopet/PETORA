@@ -123,7 +123,6 @@ export function AppointmentCalendar({
         <WeekView
           days={weekAppointments}
           onAppointmentClick={onAppointmentClick}
-          selectedDate={selectedDate}
         />
       )}
       {viewMode === "month" && (
@@ -376,7 +375,9 @@ function formatDayNumber(date: Date): string {
 }
 
 function formatTimeShort(time: string): string {
-  const [h, m] = time.split(":").map(Number);
+  const [hStr, mStr] = time.split(":");
+  const h = Number(hStr) || 0;
+  const m = Number(mStr) || 0;
   const period = h >= 12 ? "PM" : "AM";
   const hour = h % 12 || 12;
   return `${hour}:${m.toString().padStart(2, "0")} ${period}`;

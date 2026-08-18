@@ -1,7 +1,13 @@
-import { z } from 'zod';
-import { uuidSchema, dateSchema } from './base';
+import { z } from "zod";
+import { uuidSchema, dateSchema } from "./base";
 
-export const promotionTypeSchema = z.enum(['PERCENTAGE', 'FIXED', 'BUNDLE', 'HAPPY_HOUR', 'BIRTHDAY']);
+export const promotionTypeSchema = z.enum([
+  "PERCENTAGE",
+  "FIXED",
+  "BUNDLE",
+  "HAPPY_HOUR",
+  "BIRTHDAY",
+]);
 
 export const createPromotionSchema = z.object({
   code: z.string().max(50).optional(),

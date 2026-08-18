@@ -1,6 +1,6 @@
-import { z } from 'zod';
+import { z } from "zod";
 
-export const customerTagSchema = z.enum(['VIP', 'REGULAR', 'NEW', 'BLACKLIST']);
+export const customerTagSchema = z.enum(["VIP", "REGULAR", "NEW", "BLACKLIST"]);
 
 export const createCustomerSchema = z.object({
   name: z.string().min(1).max(100),

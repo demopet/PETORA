@@ -1,6 +1,7 @@
-import type { BaseEntity, UUID } from './base';
+import type { BaseEntity, UUID } from "./base";
 
-export type AppointmentStatus = 'WAITING' | 'IN_PROGRESS' | 'DONE' | 'CANCELLED';
+export type AppointmentStatus =
+  "WAITING" | "IN_PROGRESS" | "DONE" | "CANCELLED";
 
 export interface Appointment extends BaseEntity {
   customer_id: UUID;

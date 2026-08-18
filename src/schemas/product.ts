@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { uuidSchema, dateSchema } from './base';
+import { z } from "zod";
+import { uuidSchema, dateSchema } from "./base";
 
 export const createProductSchema = z.object({
   sku: z.string().min(1).max(50),
@@ -17,11 +17,21 @@ export const createProductSchema = z.object({
   expiry_date: dateSchema.optional(),
 });
 
-export const updateProductSchema = createProductSchema.partial().omit({ sku: true });
+export const updateProductSchema = createProductSchema
+  .partial()
+  .omit({ sku: true });
 
 export const createStockMovementSchema = z.object({
   product_id: uuidSchema,
-  movement_type: z.enum(['IN', 'OUT', 'RETURN', 'ADJUSTMENT', 'DAMAGED', 'EXPIRED', 'OPNAME']),
+  movement_type: z.enum([
+    "IN",
+    "OUT",
+    "RETURN",
+    "ADJUSTMENT",
+    "DAMAGED",
+    "EXPIRED",
+    "OPNAME",
+  ]),
   quantity: z.number().int(),
   reference_type: z.string().optional(),
   reference_id: uuidSchema.nullable().optional(),
@@ -30,4 +40,6 @@ export const createStockMovementSchema = z.object({
 
 export type CreateProductInput = z.infer<typeof createProductSchema>;
 export type UpdateProductInput = z.infer<typeof updateProductSchema>;
-export type CreateStockMovementInput = z.infer<typeof createStockMovementSchema>;
+export type CreateStockMovementInput = z.infer<
+  typeof createStockMovementSchema
+>;

@@ -1,5 +1,5 @@
-import { z } from 'zod';
-import { uuidSchema, dateSchema } from './base';
+import { z } from "zod";
+import { uuidSchema, dateSchema } from "./base";
 
 export const createPetSchema = z.object({
   customer_id: uuidSchema,
@@ -12,7 +12,9 @@ export const createPetSchema = z.object({
   microchip_number: z.string().max(50).optional(),
 });
 
-export const updatePetSchema = createPetSchema.partial().omit({ customer_id: true });
+export const updatePetSchema = createPetSchema
+  .partial()
+  .omit({ customer_id: true });
 
 export const createPetWeightLogSchema = z.object({
   pet_id: uuidSchema,

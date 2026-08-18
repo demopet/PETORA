@@ -1,116 +1,123 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
-import type { Product, CreateProductInput, UpdateProductInput } from '@/types/product'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/client";
+import type {
+  Product,
+  CreateProductInput,
+  UpdateProductInput,
+} from "@/types/product";
 
 export function useProducts() {
   return useQuery({
-    queryKey: ['products'],
+    queryKey: ["products"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .is('deleted_at', null)
-        .order('name')
+        .from("products")
+        .select("*")
+        .is("deleted_at", null)
+        .order("name");
 
-      if (error) throw error
-      return data as Product[]
+      if (error) throw error;
+      return data as Product[];
     },
-  })
+  });
 }
 
 export function useProduct(id: string) {
   return useQuery({
-    queryKey: ['products', id],
+    queryKey: ["products", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from("products")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-      if (error) throw error
-      return data as Product
+      if (error) throw error;
+      return data as Product;
     },
     enabled: !!id,
-  })
+  });
 }
 
 export function useCreateProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (input: CreateProductInput) => {
       const { data, error } = await supabase
-        .from('products')
+        .from("products")
         .insert({
           ...input,
-          status: 'ACTIVE',
+          status: "ACTIVE",
         })
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data as Product
+      if (error) throw error;
+      return data as Product;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-  })
+  });
 }
 
 export function useUpdateProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateProductInput }) => {
+    mutationFn: async ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateProductInput;
+    }) => {
       const { data, error } = await supabase
-        .from('products')
+        .from("products")
         .update(input)
-        .eq('id', id)
+        .eq("id", id)
         .select()
-        .single()
+        .single();
 
-      if (error) throw error
-      return data as Product
+      if (error) throw error;
+      return data as Product;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-  })
+  });
 }
 
 export function useArchiveProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
       const { error } = await supabase
-        .from('products')
-        .update({ status: 'ARCHIVED' })
-        .eq('id', id)
+        .from("products")
+        .update({ status: "ARCHIVED" })
+        .eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-  })
+  });
 }
 
 export function useDeleteProduct() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id)
+      const { error } = await supabase.from("products").delete().eq("id", id);
 
-      if (error) throw error
+      if (error) throw error;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['products'] })
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-  })
+  });
 }

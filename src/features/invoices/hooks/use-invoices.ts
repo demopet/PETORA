@@ -1,102 +1,110 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
-import type { Invoice, CreateInvoiceInput, RecordPaymentInput } from '@/types/invoice'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/client";
+import type {
+  Invoice,
+  CreateInvoiceInput,
+  RecordPaymentInput,
+} from "@/types/invoice";
+import * as invoiceService from "../services/invoice.service";
+
+interface UseCreateInvoiceOptions {
+  callerUserId?: string;
+}
+
+interface UseRecordPaymentOptions {
+  callerUserId?: string;
+}
+
+interface UseCancelInvoiceOptions {
+  callerUserId?: string;
+}
 
 export function useInvoices() {
   return useQuery({
-    queryKey: ['invoices'],
+    queryKey: ["invoices"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*')
-        .order('created_at', { ascending: false })
+        .from("invoices")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-      if (error) throw error
-      return data as Invoice[]
+      if (error) throw error;
+      return data as Invoice[];
     },
-  })
+  });
 }
 
 export function useInvoice(id: string) {
   return useQuery({
-    queryKey: ['invoices', id],
+    queryKey: ["invoices", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('invoices')
-        .select('*, invoice_items(*)')
-        .eq('id', id)
-        .single()
+        .from("invoices")
+        .select("*, invoice_items(*)")
+        .eq("id", id)
+        .single();
 
-      if (error) throw error
-      return data as Invoice
+      if (error) throw error;
+      return data as Invoice;
     },
     enabled: !!id,
-  })
+  });
 }
 
-export function useCreateInvoice() {
-  const queryClient = useQueryClient()
+export function useCreateInvoice(options?: UseCreateInvoiceOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
     mutationFn: async (input: CreateInvoiceInput) => {
-      const { data, error } = await supabase
-        .from('invoices')
-        .insert({
-          ...input,
-          status: 'UNPAID',
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      return data as Invoice
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return invoiceService.createInvoice(input, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
+      queryClient.invalidateQueries({ queryKey: ["products"] });
     },
-  })
+  });
 }
 
-export function useRecordPayment() {
-  const queryClient = useQueryClient()
+export function useRecordPayment(options?: UseRecordPaymentOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
-    mutationFn: async ({ invoiceId, input }: { invoiceId: string; input: RecordPaymentInput }) => {
-      const { data, error } = await supabase
-        .from('payments')
-        .insert({
-          ...input,
-          invoice_id: invoiceId,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      return data
+    mutationFn: async ({
+      invoiceId,
+      input,
+    }: {
+      invoiceId: string;
+      input: RecordPaymentInput;
+    }) => {
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return invoiceService.recordPayment(invoiceId, input, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
-  })
+  });
 }
 
-export function useCancelInvoice() {
-  const queryClient = useQueryClient()
+export function useCancelInvoice(options?: UseCancelInvoiceOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { data, error } = await supabase
-        .from('invoices')
-        .update({ status: 'CANCELLED' })
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return data as Invoice
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return invoiceService.cancelInvoice(id, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['invoices'] })
+      queryClient.invalidateQueries({ queryKey: ["invoices"] });
     },
-  })
+  });
 }

@@ -1,71 +1,72 @@
-import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { StatusBadge } from '@/components/ui/status-badge'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useExpenses } from '../hooks/use-expenses'
-import { useApproveExpense } from '../hooks/use-expenses'
-import { useRejectExpense } from '../hooks/use-expenses'
-import type { Expense } from '@/types/expense'
+import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { StatusBadge } from "@/components/ui/status-badge";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useExpenses } from "../hooks/use-expenses";
+import { useApproveExpense } from "../hooks/use-expenses";
+import { useRejectExpense } from "../hooks/use-expenses";
+import type { Expense } from "@/types/expense";
 
 export default function ExpensesPage() {
-  const [search, setSearch] = useState('')
-  const { data: expenses, isLoading, error } = useExpenses()
-  const approveMutation = useApproveExpense()
-  const rejectMutation = useRejectExpense()
+  const [search, setSearch] = useState("");
+  const { data: expenses, isLoading, error } = useExpenses();
+  const approveMutation = useApproveExpense();
+  const rejectMutation = useRejectExpense();
 
   const filteredExpenses = expenses?.filter((expense) =>
-    expense.description?.toLowerCase().includes(search.toLowerCase())
-  )
+    expense.description?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const handleApprove = async (id: string) => {
-    await approveMutation.mutateAsync(id)
-  }
+    await approveMutation.mutateAsync(id);
+  };
 
   const handleReject = async (id: string) => {
-    if (confirm('Are you sure you want to reject this expense?')) {
-      await rejectMutation.mutateAsync(id)
+    if (confirm("Are you sure you want to reject this expense?")) {
+      await rejectMutation.mutateAsync(id);
     }
-  }
+  };
 
   const columns = [
     {
-      header: 'Date',
-      accessorKey: 'expense_date' as const,
+      header: "Date",
+      accessorKey: "expense_date" as const,
     },
     {
-      header: 'Description',
-      accessorKey: 'description' as const,
-      cell: ({ original }: { original: Expense }) => original.description || '-',
+      header: "Description",
+      accessorKey: "description" as const,
+      cell: ({ original }: { original: Expense }) =>
+        original.description || "-",
     },
     {
-      header: 'Amount',
-      accessorKey: 'amount' as const,
+      header: "Amount",
+      accessorKey: "amount" as const,
       cell: ({ original }: { original: Expense }) => (
         <div className="font-medium">
-          {new Intl.NumberFormat('id-ID', {
-            style: 'currency',
-            currency: 'IDR',
+          {new Intl.NumberFormat("id-ID", {
+            style: "currency",
+            currency: "IDR",
             minimumFractionDigits: 0,
           }).format(original.amount)}
         </div>
       ),
     },
     {
-      header: 'Status',
-      accessorKey: 'status' as const,
+      header: "Status",
+      accessorKey: "status" as const,
       cell: ({ original }: { original: Expense }) => (
         <StatusBadge status={original.status} />
       ),
     },
     {
-      header: 'Actions',
-      accessorKey: 'id' as const,
+      header: "Actions",
+      accessorKey: "id" as const,
       cell: ({ original }: { original: Expense }) => (
         <div className="flex items-center gap-2">
-          {original.status === 'PENDING' && (
+          {original.status === "PENDING" && (
             <>
               <Button
                 variant="ghost"
@@ -86,14 +87,14 @@ export default function ExpensesPage() {
         </div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading expenses...</div>
+    return <div className="text-slate-500">Loading expenses...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading expenses</div>
+    return <div className="text-danger-500">Error loading expenses</div>;
   }
 
   return (
@@ -143,5 +144,5 @@ export default function ExpensesPage() {
         }
       />
     </div>
-  )
+  );
 }

@@ -1,50 +1,55 @@
-import { useState } from 'react'
-import { Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { Input } from '@/components/ui/input'
-import { useStockMovements } from '../hooks/use-inventory'
-import type { StockMovement } from '@/types/product'
+import { useState } from "react";
+import { Search } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { Input } from "@/components/ui/input";
+import { useStockMovements } from "../hooks/use-inventory";
+import type { StockMovement } from "@/types/product";
 
 export default function InventoryPage() {
-  const [search, setSearch] = useState('')
-  const { data: movements, isLoading, error } = useStockMovements()
+  const [search, setSearch] = useState("");
+  const { data: movements, isLoading, error } = useStockMovements();
 
   const filteredMovements = movements?.filter((movement) =>
-    movement.reference_type?.toLowerCase().includes(search.toLowerCase())
-  )
+    movement.reference_type?.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const columns = [
     {
-      header: 'Type',
-      accessorKey: 'movement_type' as const,
+      header: "Type",
+      accessorKey: "movement_type" as const,
     },
     {
-      header: 'Quantity',
-      accessorKey: 'quantity' as const,
+      header: "Quantity",
+      accessorKey: "quantity" as const,
       cell: ({ original }: { original: StockMovement }) => (
-        <div className={`font-medium ${original.quantity > 0 ? 'text-success-600' : 'text-danger-600'}`}>
-          {original.quantity > 0 ? '+' : ''}{original.quantity}
+        <div
+          className={`font-medium ${original.quantity > 0 ? "text-success-600" : "text-danger-600"}`}
+        >
+          {original.quantity > 0 ? "+" : ""}
+          {original.quantity}
         </div>
       ),
     },
     {
-      header: 'Reference',
-      accessorKey: 'reference_type' as const,
-      cell: ({ original }: { original: StockMovement }) => original.reference_type || '-',
+      header: "Reference",
+      accessorKey: "reference_type" as const,
+      cell: ({ original }: { original: StockMovement }) =>
+        original.reference_type || "-",
     },
     {
-      header: 'Notes',
-      accessorKey: 'notes' as const,
-      cell: ({ original }: { original: StockMovement }) => original.notes || '-',
+      header: "Notes",
+      accessorKey: "notes" as const,
+      cell: ({ original }: { original: StockMovement }) =>
+        original.notes || "-",
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading inventory...</div>
+    return <div className="text-slate-500">Loading inventory...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading inventory</div>
+    return <div className="text-danger-500">Error loading inventory</div>;
   }
 
   return (
@@ -75,5 +80,5 @@ export default function InventoryPage() {
         searchKey="reference_type"
       />
     </div>
-  )
+  );
 }

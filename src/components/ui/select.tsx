@@ -1,22 +1,28 @@
-import * as React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface SelectProps {
-  value?: string
-  onValueChange: (_value: string) => void
-  placeholder?: string
-  children: React.ReactNode
-  className?: string
+  value?: string;
+  onValueChange: (_value: string) => void;
+  placeholder?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
-export function Select({ value: _value, onValueChange, placeholder, children, className }: SelectProps) {
+export function Select({
+  value: _value,
+  onValueChange,
+  placeholder,
+  children,
+  className,
+}: SelectProps) {
   return (
     <select
       value={_value}
       onChange={(e) => onValueChange(e.target.value)}
       className={cn(
-        'flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50',
-        className
+        "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm ring-offset-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 disabled:cursor-not-allowed disabled:opacity-50",
+        className,
       )}
     >
       {placeholder && (
@@ -26,14 +32,14 @@ export function Select({ value: _value, onValueChange, placeholder, children, cl
       )}
       {children}
     </select>
-  )
+  );
 }
 
 interface SelectOptionProps {
-  value: string
-  children: React.ReactNode
+  value: string;
+  children: React.ReactNode;
 }
 
 export function SelectOption({ value, children }: SelectOptionProps) {
-  return <option value={value}>{children}</option>
+  return <option value={value}>{children}</option>;
 }

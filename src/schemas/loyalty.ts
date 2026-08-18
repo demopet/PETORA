@@ -1,8 +1,8 @@
-import { z } from 'zod';
-import { uuidSchema } from './base';
+import { z } from "zod";
+import { uuidSchema } from "./base";
 
 export const createLoyaltyTierSchema = z.object({
-  tier_name: z.enum(['BRONZE', 'SILVER', 'GOLD', 'PLATINUM']),
+  tier_name: z.enum(["BRONZE", "SILVER", "GOLD", "PLATINUM"]),
   min_points: z.number().int().nonnegative(),
   min_spending: z.number().nonnegative(),
   point_multiplier: z.number().positive(),

@@ -1,10 +1,10 @@
-import { Navigate, Route, Routes } from 'react-router-dom'
-import PortalLayout from './PortalLayout'
-import PortalHomePage from './pages/PortalHomePage'
-import PortalAppointmentsPage from './pages/PortalAppointmentsPage'
-import PortalShopPage from './pages/PortalShopPage'
-import PortalLoyaltyPage from './pages/PortalLoyaltyPage'
-import PortalProfilePage from './pages/PortalProfilePage'
+import { Navigate, Route, Routes } from "react-router-dom";
+import PortalLayout from "./PortalLayout";
+import PortalHomePage from "./pages/PortalHomePage";
+import PortalAppointmentsPage from "./pages/PortalAppointmentsPage";
+import PortalShopPage from "./pages/PortalShopPage";
+import PortalLoyaltyPage from "./pages/PortalLoyaltyPage";
+import PortalProfilePage from "./pages/PortalProfilePage";
 
 export default function PortalApp() {
   return (
@@ -18,5 +18,5 @@ export default function PortalApp() {
       </Route>
       <Route path="*" element={<Navigate to="/portal" replace />} />
     </Routes>
-  )
+  );
 }

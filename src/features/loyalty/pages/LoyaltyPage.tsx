@@ -1,56 +1,65 @@
-import { useState } from 'react'
-import { Plus, Search } from 'lucide-react'
-import { DataTable } from '@/components/ui/data-table'
-import { EmptyState } from '@/components/ui/empty-state'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { useLoyaltyMembers } from '../hooks/use-loyalty'
-import type { LoyaltyMember, LoyaltyTierConfig } from '@/types/loyalty'
+import { useState } from "react";
+import { Plus, Search } from "lucide-react";
+import { DataTable } from "@/components/ui/data-table";
+import { EmptyState } from "@/components/ui/empty-state";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useLoyaltyMembers } from "../hooks/use-loyalty";
+import type { LoyaltyMember, LoyaltyTierConfig } from "@/types/loyalty";
 
 export default function LoyaltyPage() {
-  const [search, setSearch] = useState('')
-  const { data: members, isLoading, error } = useLoyaltyMembers()
+  const [search, setSearch] = useState("");
+  const { data: members, isLoading, error } = useLoyaltyMembers();
 
   const filteredMembers = members?.filter((member) =>
-    member.customer_id.toLowerCase().includes(search.toLowerCase())
-  )
+    member.customer_id.toLowerCase().includes(search.toLowerCase()),
+  );
 
   const columns = [
     {
-      header: 'Member ID',
-      accessorKey: 'customer_id' as const,
-      cell: ({ original }: { original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig } }) => (
+      header: "Member ID",
+      accessorKey: "customer_id" as const,
+      cell: ({
+        original,
+      }: {
+        original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig };
+      }) => (
         <div className="font-medium text-slate-900">{original.customer_id}</div>
       ),
     },
     {
-      header: 'Tier',
-      accessorKey: 'tier_id' as const,
-      cell: ({ original }: { original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig } }) =>
-        original.loyalty_tiers?.tier_name || '-',
+      header: "Tier",
+      accessorKey: "tier_id" as const,
+      cell: ({
+        original,
+      }: {
+        original: LoyaltyMember & { loyalty_tiers: LoyaltyTierConfig };
+      }) => original.loyalty_tiers?.tier_name || "-",
     },
     {
-      header: 'Total Points',
-      accessorKey: 'total_points' as const,
+      header: "Total Points",
+      accessorKey: "total_points" as const,
       cell: ({ original }: { original: LoyaltyMember }) => (
-        <div className="font-medium text-primary-600">{original.total_points}</div>
+        <div className="font-medium text-primary-600">
+          {original.total_points}
+        </div>
       ),
     },
     {
-      header: 'Available Points',
-      accessorKey: 'available_points' as const,
+      header: "Available Points",
+      accessorKey: "available_points" as const,
       cell: ({ original }: { original: LoyaltyMember }) => (
         <div className="font-medium">{original.available_points}</div>
       ),
     },
-  ]
+  ];
 
   if (isLoading) {
-    return <div className="text-slate-500">Loading loyalty members...</div>
+    return <div className="text-slate-500">Loading loyalty members...</div>;
   }
 
   if (error) {
-    return <div className="text-danger-500">Error loading loyalty members</div>
+    return <div className="text-danger-500">Error loading loyalty members</div>;
   }
 
   return (
@@ -100,5 +109,5 @@ export default function LoyaltyPage() {
         }
       />
     </div>
-  )
+  );
 }

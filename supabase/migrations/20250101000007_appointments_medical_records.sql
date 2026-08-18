@@ -190,10 +190,6 @@ BEGIN
     RAISE EXCEPTION 'FORBIDDEN: not your appointment' USING ERRCODE = '42501';
   END IF;
 
-  IF p_new_status = 'IN_PROGRESS' AND v_caller_role = 'DOKTER' AND v_appointment.doctor_id != p_caller_id THEN
-    RAISE EXCEPTION 'FORBIDDEN: only assigned doctor can start appointment' USING ERRCODE = '42501';
-  END IF;
-
   UPDATE appointments
   SET status = p_new_status, updated_at = NOW()
   WHERE id = p_appointment_id;
@@ -236,7 +232,7 @@ DECLARE
 BEGIN
   SELECT role INTO v_caller_role FROM users WHERE id = p_caller_id;
 
-  IF v_caller_role NOT IN ('OWNER', 'ADMIN', 'DOKTER', 'CUSTOMER') THEN
+  IF v_caller_role NOT IN ('OWNER', 'ADMIN', 'CUSTOMER') THEN
     RAISE EXCEPTION 'FORBIDDEN' USING ERRCODE = '42501';
   END IF;
 
@@ -255,10 +251,6 @@ BEGIN
     IF v_appointment.customer_id != (SELECT customer_id FROM users WHERE id = p_caller_id) THEN
       RAISE EXCEPTION 'FORBIDDEN: not your appointment' USING ERRCODE = '42501';
     END IF;
-  END IF;
-
-  IF v_caller_role = 'DOKTER' AND v_appointment.doctor_id != p_caller_id THEN
-    RAISE EXCEPTION 'FORBIDDEN: not your appointment' USING ERRCODE = '42501';
   END IF;
 
   UPDATE appointments

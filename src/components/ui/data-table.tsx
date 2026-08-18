@@ -1,16 +1,16 @@
-import * as React from 'react'
-import { cn } from '@/lib/utils'
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 interface DataTableProps<TData> {
   columns: Array<{
-    header: string
-    accessorKey: string
-    cell?: (_row: { original: TData }) => React.ReactNode
-  }>
-  data: TData[]
-  searchKey?: string
-  emptyState?: React.ReactNode
-  className?: string
+    header: string;
+    accessorKey: string;
+    cell?: (_row: { original: TData }) => React.ReactNode;
+  }>;
+  data: TData[];
+  searchKey?: string;
+  emptyState?: React.ReactNode;
+  className?: string;
 }
 
 export function DataTable<TData>({
@@ -21,7 +21,7 @@ export function DataTable<TData>({
   className,
 }: DataTableProps<TData>) {
   return (
-    <div className={cn('space-y-4', className)}>
+    <div className={cn("space-y-4", className)}>
       {searchKey && (
         <div className="flex items-center gap-2">
           <input
@@ -54,7 +54,9 @@ export function DataTable<TData>({
                     <td key={column.accessorKey} className="px-4 py-3">
                       {column.cell
                         ? column.cell({ original: _row })
-                        : (_row as Record<string, unknown>)[column.accessorKey] as React.ReactNode}
+                        : ((_row as Record<string, unknown>)[
+                            column.accessorKey
+                          ] as React.ReactNode)}
                     </td>
                   ))}
                 </tr>
@@ -74,5 +76,5 @@ export function DataTable<TData>({
         </table>
       </div>
     </div>
-  )
+  );
 }

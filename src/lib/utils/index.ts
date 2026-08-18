@@ -1,4 +1,11 @@
-export { formatCurrency, formatNumber, formatDate, formatDateTime, formatTime, cn } from './format';
+export {
+  formatCurrency,
+  formatNumber,
+  formatDate,
+  formatDateTime,
+  formatTime,
+  cn,
+} from "./format";
 export {
   calculateLoyaltyPoints,
   canRedeemPoints,
@@ -6,4 +13,4 @@ export {
   calculateChange,
   validateStockAvailability,
   calculateReorderSuggestion,
-} from '../business-rules';
+} from "../business-rules";

@@ -24,6 +24,9 @@ interface CustomerFormProps {
     notes?: string;
     is_guest?: boolean;
     tags?: CustomerTag[];
+    create_account?: boolean;
+    username?: string;
+    pin?: string;
   }) => void;
   initialData?: {
     name?: string;
@@ -34,6 +37,9 @@ interface CustomerFormProps {
     notes?: string;
     is_guest?: boolean;
     tags?: CustomerTag[];
+    create_account?: boolean;
+    username?: string;
+    pin?: string;
   };
 }
 
@@ -52,6 +58,9 @@ export function CustomerForm({
     notes: initialData?.notes || "",
     is_guest: initialData?.is_guest || false,
     tags: initialData?.tags || [],
+    create_account: initialData?.create_account || false,
+    username: initialData?.username || "",
+    pin: initialData?.pin || "",
   });
 
   React.useEffect(() => {
@@ -65,6 +74,9 @@ export function CustomerForm({
         notes: initialData.notes || "",
         is_guest: initialData.is_guest || false,
         tags: initialData.tags || [],
+        create_account: initialData.create_account || false,
+        username: initialData.username || "",
+        pin: initialData.pin || "",
       });
     }
   }, [initialData]);
@@ -147,6 +159,53 @@ export function CustomerForm({
               rows={3}
             />
           </FormField>
+
+          <div className="flex items-center gap-2">
+            <input
+              id="create-account"
+              type="checkbox"
+              checked={formData.create_account}
+              onChange={(e) =>
+                setFormData({ ...formData, create_account: e.target.checked })
+              }
+              className="h-4 w-4 rounded border-slate-300"
+            />
+            <label htmlFor="create-account" className="text-sm text-slate-700">
+              Create portal account
+            </label>
+          </div>
+
+          {formData.create_account && (
+            <>
+              <FormField label="Username" required>
+                <Input
+                  value={formData.username}
+                  onChange={(e) =>
+                    setFormData({ ...formData, username: e.target.value })
+                  }
+                  placeholder="Enter username"
+                  required={formData.create_account}
+                />
+              </FormField>
+
+              <FormField label="PIN" required>
+                <Input
+                  type="text"
+                  inputMode="numeric"
+                  value={formData.pin}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      pin: e.target.value.replace(/\D/g, "").slice(0, 6),
+                    })
+                  }
+                  placeholder="Enter 6-digit PIN"
+                  required={formData.create_account}
+                  maxLength={6}
+                />
+              </FormField>
+            </>
+          )}
 
           <DialogFooter>
             <Button

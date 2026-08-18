@@ -1,6 +1,6 @@
-import type { BaseEntity, UUID } from './base';
+import type { BaseEntity, UUID } from "./base";
 
-export type FeedbackRating = '1' | '2' | '3' | '4' | '5';
+export type FeedbackRating = "1" | "2" | "3" | "4" | "5";
 
 export interface CustomerFeedback extends BaseEntity {
   customer_id: UUID;

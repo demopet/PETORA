@@ -24,7 +24,7 @@
     "size": "size-limit",
     "db:push": "supabase db push",
     "db:reset": "supabase db reset",
-    "db:seed": "tsx tests/seed/seed.ts",
+    "db:seed": "tsx supabase/seed/seed.ts",
     "prepare": "husky install",
     "lint-staged": "lint-staged",
     "commitlint": "commitlint --from=HEAD~1 --to=HEAD"
@@ -46,6 +46,7 @@
     "zod": "^4.1.7"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@commitlint/cli": "^19.6.1",
     "@commitlint/config-conventional": "^19.6.1",
     "@faker-js/faker": "^9.7.0",

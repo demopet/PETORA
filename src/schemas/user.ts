@@ -1,7 +1,13 @@
-import { z } from 'zod';
-import { uuidSchema } from './base';
+import { z } from "zod";
+import { uuidSchema } from "./base";
 
-export const userRoleSchema = z.enum(['OWNER', 'ADMIN', 'DOKTER', 'KASIR', 'CUSTOMER']);
+export const userRoleSchema = z.enum([
+  "OWNER",
+  "ADMIN",
+  "DOKTER",
+  "KASIR",
+  "CUSTOMER",
+]);
 
 export const loginCredentialsSchema = z.object({
   username: z.string().min(3).max(50),
@@ -9,7 +15,11 @@ export const loginCredentialsSchema = z.object({
 });
 
 export const createUserSchema = z.object({
-  username: z.string().min(3).max(50).regex(/^[a-z0-9._]+$/),
+  username: z
+    .string()
+    .min(3)
+    .max(50)
+    .regex(/^[a-z0-9._]+$/),
   pin: z.string().length(6).regex(/^\d+$/),
   role: userRoleSchema,
   full_name: z.string().min(1).max(100),
