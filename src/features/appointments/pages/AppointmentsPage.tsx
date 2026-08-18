@@ -1,28 +1,44 @@
 import { useState } from "react";
-import { Plus, Search, Eye } from "lucide-react";
+import { Plus, Search, Eye, Calendar, List } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { AppointmentForm } from "../components/AppointmentForm";
+import { AppointmentCalendar } from "../components/AppointmentCalendar";
 import {
   useAppointments,
   useCreateAppointment,
+  useUpdateAppointmentStatus,
 } from "../hooks/use-appointments";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
 import { usePets } from "@/features/pets/hooks/use-pets";
-import type { Appointment } from "@/types/appointment";
+import type { Appointment, AppointmentStatus } from "@/types/appointment";
+
+type ViewMode = "list" | "calendar";
 
 export default function AppointmentsPage() {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>("list");
+  const [promptOpen, setPromptOpen] = useState(false);
+  const [promptAppointment, setPromptAppointment] =
+    useState<Appointment | null>(null);
   const { data: appointments, isLoading, error } = useAppointments();
   const { data: customers } = useCustomers();
   const { data: pets } = usePets();
   const createAppointmentMutation = useCreateAppointment();
+  const updateStatusMutation = useUpdateAppointmentStatus();
 
   const filteredAppointments = appointments?.filter(
     (apt) =>
@@ -63,17 +79,51 @@ export default function AppointmentsPage() {
       header: "Actions",
       accessorKey: "id" as const,
       cell: ({ original }: { original: Appointment }) => (
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => navigate(`/appointments/${original.id}`)}
-          title="View Details"
-        >
-          <Eye className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => navigate(`/appointments/${original.id}`)}
+            title="View Details"
+          >
+            <Eye className="h-4 w-4" />
+          </Button>
+          {original.status === "WAITING" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleStatusChange(original.id, "IN_PROGRESS")}
+              disabled={updateStatusMutation.isPending}
+            >
+              Start
+            </Button>
+          )}
+          {original.status === "IN_PROGRESS" && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => handleStatusChange(original.id, "DONE")}
+              disabled={updateStatusMutation.isPending}
+            >
+              Done
+            </Button>
+          )}
+        </div>
       ),
     },
   ];
+
+  const handleStatusChange = async (id: string, status: AppointmentStatus) => {
+    try {
+      const result = await updateStatusMutation.mutateAsync({ id, status });
+      if (result.promptCreateMedicalRecord) {
+        setPromptAppointment(result.appointment);
+        setPromptOpen(true);
+      }
+    } catch (e) {
+      console.error("Failed to update status", e);
+    }
+  };
 
   if (isLoading) {
     return <div className="text-slate-500">Loading appointments...</div>;
@@ -98,7 +148,7 @@ export default function AppointmentsPage() {
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center justify-between gap-4">
         <div className="relative flex-1 max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
           <Input
@@ -109,26 +159,53 @@ export default function AppointmentsPage() {
             className="pl-9"
           />
         </div>
+        <div className="flex items-center gap-1 rounded-lg bg-slate-100 p-1">
+          <Button
+            variant={viewMode === "list" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("list")}
+          >
+            <List className="h-4 w-4 mr-1" />
+            List
+          </Button>
+          <Button
+            variant={viewMode === "calendar" ? "default" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("calendar")}
+          >
+            <Calendar className="h-4 w-4 mr-1" />
+            Calendar
+          </Button>
+        </div>
       </div>
 
-      <DataTable
-        columns={columns}
-        data={filteredAppointments || []}
-        searchKey="appointment_date"
-        emptyState={
-          <EmptyState
-            icon={<Plus className="h-12 w-12" />}
-            title="No appointments found"
-            description="Get started by creating your first appointment."
-            action={
-              <Button onClick={() => setFormOpen(true)}>
-                <Plus className="h-4 w-4" />
-                New Appointment
-              </Button>
-            }
-          />
-        }
-      />
+      {viewMode === "list" && (
+        <DataTable
+          columns={columns}
+          data={filteredAppointments || []}
+          searchKey="appointment_date"
+          emptyState={
+            <EmptyState
+              icon={<Plus className="h-12 w-12" />}
+              title="No appointments found"
+              description="Get started by creating your first appointment."
+              action={
+                <Button onClick={() => setFormOpen(true)}>
+                  <Plus className="h-4 w-4" />
+                  New Appointment
+                </Button>
+              }
+            />
+          }
+        />
+      )}
+
+      {viewMode === "calendar" && (
+        <AppointmentCalendar
+          appointments={appointments || []}
+          onAppointmentClick={(apt) => navigate(`/appointments/${apt.id}`)}
+        />
+      )}
 
       <AppointmentForm
         open={formOpen}
@@ -152,6 +229,36 @@ export default function AppointmentsPage() {
         }
         doctors={[]}
       />
+
+      <Dialog open={promptOpen} onOpenChange={setPromptOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Create Medical Record</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-slate-600">
+            Appointment #{promptAppointment?.queue_number} has been marked as
+            DONE. Would you like to create a medical record for this
+            appointment?
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPromptOpen(false)}>
+              Skip
+            </Button>
+            <Button
+              onClick={() => {
+                setPromptOpen(false);
+                if (promptAppointment) {
+                  navigate(
+                    `/medical-records/new?appointmentId=${promptAppointment.id}`,
+                  );
+                }
+              }}
+            >
+              Create Medical Record
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

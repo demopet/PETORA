@@ -1,20 +1,37 @@
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mail, Phone, MapPin, Plus } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Plus, UserCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCustomers } from "../hooks/use-customers";
 import { usePets } from "@/features/pets/hooks/use-pets";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { DataTable } from "@/components/ui/data-table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { useAuth } from "@/features/auth/context/AuthContext";
+import { useConvertGuest } from "../hooks/use-customers";
+import { toast } from "sonner";
 import type { Pet } from "@/types/pet";
 
 export default function CustomerDetailPage() {
   const { customerId } = useParams<{ customerId: string }>();
   const navigate = useNavigate();
-
+  const { user } = useAuth();
   const { data: customers } = useCustomers();
   const customer = customers?.find((c) => c.id === customerId);
-
   const { data: pets = [] } = usePets(customerId);
+  const convertGuestMutation = useConvertGuest({ callerUserId: user?.id });
+
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [convertUsername, setConvertUsername] = useState("");
+  const [convertPin, setConvertPin] = useState("");
 
   if (!customerId) {
     return (
@@ -80,6 +97,40 @@ export default function CustomerDetailPage() {
     BLACKLIST: "bg-red-100 text-red-700",
   };
 
+  const handleConvertClick = () => {
+    setConvertUsername("");
+    setConvertPin("");
+    setConvertOpen(true);
+  };
+
+  const handleConvertSubmit = async () => {
+    if (!convertUsername && !convertPin) {
+      toast.error("Please provide both username and PIN to create an account.");
+      return;
+    }
+    if (convertUsername && !convertPin) {
+      toast.error("Please provide a PIN.");
+      return;
+    }
+    if (!convertUsername && convertPin) {
+      toast.error("Please provide a username.");
+      return;
+    }
+    try {
+      await convertGuestMutation.mutateAsync({
+        customerId: customer.id,
+        username: convertUsername,
+        pin: convertPin,
+      });
+      toast.success("Customer converted to registered successfully.");
+      setConvertOpen(false);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to convert customer",
+      );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -106,7 +157,20 @@ export default function CustomerDetailPage() {
             ))}
           </div>
         </div>
-        <StatusBadge status={customer.is_active ? "ACTIVE" : "ARCHIVED"} />
+        <div className="flex items-center gap-2">
+          <StatusBadge status={customer.is_active ? "ACTIVE" : "ARCHIVED"} />
+          {customer.is_guest && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleConvertClick}
+              className="gap-2"
+            >
+              <UserCheck className="h-4 w-4" />
+              Convert to Registered
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Contact Info Card */}
@@ -213,6 +277,43 @@ export default function CustomerDetailPage() {
           </p>
         </div>
       </div>
+
+      {/* Convert Guest Dialog */}
+      <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Convert to Registered Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-slate-600">
+              Converting <strong>{customer.name}</strong> from guest to
+              registered. You can optionally create a user account for them.
+            </p>
+            <FormField label="Username (optional)">
+              <Input
+                value={convertUsername}
+                onChange={(e) => setConvertUsername(e.target.value)}
+                placeholder="Enter username for new account"
+              />
+            </FormField>
+            <FormField label="PIN (6 digits, optional)">
+              <Input
+                type="password"
+                value={convertPin}
+                onChange={(e) => setConvertPin(e.target.value)}
+                placeholder="Enter 6-digit PIN"
+                maxLength={6}
+              />
+            </FormField>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConvertOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConvertSubmit}>Convert</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

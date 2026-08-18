@@ -1,99 +1,140 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '@/lib/supabase/client'
-import type { Customer, CreateCustomerInput, UpdateCustomerInput } from '@/types/customer'
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase/client";
+import type {
+  Customer,
+  CreateCustomerInput,
+  UpdateCustomerInput,
+} from "@/types/customer";
+import * as customerService from "../services/customer.service";
+
+interface UseCreateCustomerOptions {
+  callerUserId?: string;
+}
+
+interface UseUpdateCustomerOptions {
+  callerUserId?: string;
+}
+
+interface UseDeleteCustomerOptions {
+  callerUserId?: string;
+}
 
 export function useCustomers() {
   return useQuery({
-    queryKey: ['customers'],
+    queryKey: ["customers"],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .is('deleted_at', null)
-        .order('name')
+        .from("customers")
+        .select("*")
+        .is("deleted_at", null)
+        .order("name");
 
-      if (error) throw error
-      return data as Customer[]
+      if (error) throw error;
+      return data as Customer[];
     },
-  })
+  });
 }
 
 export function useCustomer(id: string) {
   return useQuery({
-    queryKey: ['customers', id],
+    queryKey: ["customers", id],
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('customers')
-        .select('*')
-        .eq('id', id)
-        .single()
+        .from("customers")
+        .select("*")
+        .eq("id", id)
+        .single();
 
-      if (error) throw error
-      return data as Customer
+      if (error) throw error;
+      return data as Customer;
     },
     enabled: !!id,
-  })
+  });
 }
 
-export function useCreateCustomer() {
-  const queryClient = useQueryClient()
+export function useCreateCustomer(options?: UseCreateCustomerOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
     mutationFn: async (input: CreateCustomerInput) => {
-      const { data, error } = await supabase
-        .from('customers')
-        .insert({
-          ...input,
-          is_guest: input.is_guest ?? false,
-          tags: input.tags ?? [],
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      return data as Customer
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return customerService.createCustomer(input, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
-  })
+  });
 }
 
-export function useUpdateCustomer() {
-  const queryClient = useQueryClient()
+export function useUpdateCustomer(options?: UseUpdateCustomerOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
-    mutationFn: async ({ id, input }: { id: string; input: UpdateCustomerInput }) => {
-      const { data, error } = await supabase
-        .from('customers')
-        .update(input)
-        .eq('id', id)
-        .select()
-        .single()
-
-      if (error) throw error
-      return data as Customer
+    mutationFn: async ({
+      id,
+      input,
+    }: {
+      id: string;
+      input: UpdateCustomerInput;
+    }) => {
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return customerService.updateCustomer(id, input, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
-  })
+  });
 }
 
-export function useDeleteCustomer() {
-  const queryClient = useQueryClient()
+export function useDeleteCustomer(options?: UseDeleteCustomerOptions) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
 
   return useMutation({
     mutationFn: async (id: string) => {
-      const { error } = await supabase
-        .from('customers')
-        .update({ deleted_at: new Date().toISOString() })
-        .eq('id', id)
-
-      if (error) throw error
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return customerService.deleteCustomer(id, callerUserId);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['customers'] })
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
     },
-  })
+  });
+}
+
+export function useConvertGuest(options?: { callerUserId?: string }) {
+  const queryClient = useQueryClient();
+  const callerUserId = options?.callerUserId;
+
+  return useMutation({
+    mutationFn: async ({
+      customerId,
+      username,
+      pin,
+    }: {
+      customerId: string;
+      username: string;
+      pin: string;
+    }) => {
+      if (!callerUserId) {
+        throw new Error("callerUserId is required");
+      }
+      return customerService.convertGuest(
+        customerId,
+        username,
+        pin,
+        callerUserId,
+      );
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+    },
+  });
 }

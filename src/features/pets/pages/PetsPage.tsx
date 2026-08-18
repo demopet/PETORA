@@ -13,6 +13,7 @@ import {
   useDeletePet,
 } from "../hooks/use-pets";
 import { useCustomers } from "@/features/customers/hooks/use-customers";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import type { Pet } from "@/types/pet";
 
 interface PetsPageProps {
@@ -21,14 +22,15 @@ interface PetsPageProps {
 
 export default function PetsPage({ customerId }: PetsPageProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingPet, setEditingPet] = useState<Pet | null>(null);
   const { data: pets, isLoading, error } = usePets(customerId);
   const { data: customers } = useCustomers();
-  const createMutation = useCreatePet();
-  const updateMutation = useUpdatePet();
-  const deleteMutation = useDeletePet();
+  const createMutation = useCreatePet({ callerUserId: user?.id });
+  const updateMutation = useUpdatePet({ callerUserId: user?.id });
+  const deleteMutation = useDeletePet({ callerUserId: user?.id });
 
   const filteredPets = pets?.filter(
     (pet) =>

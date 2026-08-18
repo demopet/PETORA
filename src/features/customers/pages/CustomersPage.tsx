@@ -1,29 +1,56 @@
 import { useState } from "react";
-import { Plus, Search, Trash2, Edit, Eye, UserPlus } from "lucide-react";
+import {
+  Plus,
+  Search,
+  Trash2,
+  Edit,
+  Eye,
+  UserPlus,
+  UserCheck,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { DataTable } from "@/components/ui/data-table";
 import { StatusBadge } from "@/components/ui/status-badge";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { FormField } from "@/components/ui/form-field";
 import { CustomerForm } from "../components/CustomerForm";
 import {
   useCustomers,
   useCreateCustomer,
   useUpdateCustomer,
   useDeleteCustomer,
+  useConvertGuest,
 } from "../hooks/use-customers";
+import { useAuth } from "@/features/auth/context/AuthContext";
 import type { Customer } from "@/types/customer";
+import { toast } from "sonner";
 
 export default function CustomersPage() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState<Customer | null>(null);
+  const [convertOpen, setConvertOpen] = useState(false);
+  const [convertingCustomer, setConvertingCustomer] = useState<Customer | null>(
+    null,
+  );
+  const [convertUsername, setConvertUsername] = useState("");
+  const [convertPin, setConvertPin] = useState("");
   const { data: customers, isLoading, error } = useCustomers();
-  const createMutation = useCreateCustomer();
-  const updateMutation = useUpdateCustomer();
-  const deleteMutation = useDeleteCustomer();
+  const createMutation = useCreateCustomer({ callerUserId: user?.id });
+  const updateMutation = useUpdateCustomer({ callerUserId: user?.id });
+  const deleteMutation = useDeleteCustomer({ callerUserId: user?.id });
+  const convertMutation = useConvertGuest({ callerUserId: user?.id });
 
   const filteredCustomers = customers?.filter(
     (customer) =>
@@ -40,6 +67,45 @@ export default function CustomersPage() {
   const handleEdit = (customer: Customer) => {
     setEditingCustomer(customer);
     setFormOpen(true);
+  };
+
+  const handleConvertClick = (customer: Customer) => {
+    setConvertingCustomer(customer);
+    setConvertUsername("");
+    setConvertPin("");
+    setConvertOpen(true);
+  };
+
+  const handleConvertSubmit = async () => {
+    if (!convertingCustomer) return;
+    if (!convertUsername && !convertPin) {
+      toast.error("Please provide both username and PIN to create an account.");
+      return;
+    }
+    if (convertUsername && !convertPin) {
+      toast.error("Please provide a PIN.");
+      return;
+    }
+    if (!convertUsername && convertPin) {
+      toast.error("Please provide a username.");
+      return;
+    }
+    try {
+      await convertMutation.mutateAsync({
+        customerId: convertingCustomer.id,
+        username: convertUsername,
+        pin: convertPin,
+      });
+      toast.success("Customer converted to registered successfully.");
+      setConvertOpen(false);
+      setConvertingCustomer(null);
+      setConvertUsername("");
+      setConvertPin("");
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to convert customer",
+      );
+    }
   };
 
   const columns = [
@@ -66,6 +132,13 @@ export default function CustomersPage() {
       ),
     },
     {
+      header: "Type",
+      accessorKey: "is_guest" as const,
+      cell: ({ original }: { original: Customer }) => (
+        <StatusBadge status={original.is_guest ? "GUEST" : "REGISTERED"} />
+      ),
+    },
+    {
       header: "Actions",
       accessorKey: "id" as const,
       cell: ({ original }: { original: Customer }) => (
@@ -78,6 +151,16 @@ export default function CustomersPage() {
           >
             <Eye className="h-4 w-4" />
           </Button>
+          {original.is_guest && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => handleConvertClick(original)}
+              title="Convert to Registered"
+            >
+              <UserCheck className="h-4 w-4 text-green-600" />
+            </Button>
+          )}
           <Button
             variant="ghost"
             size="icon"
@@ -200,6 +283,42 @@ export default function CustomersPage() {
             : undefined
         }
       />
+
+      <Dialog open={convertOpen} onOpenChange={setConvertOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Convert to Registered Customer</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-slate-600">
+              Converting <strong>{convertingCustomer?.name}</strong> from guest
+              to registered. You can optionally create a user account for them.
+            </p>
+            <FormField label="Username (optional)">
+              <Input
+                value={convertUsername}
+                onChange={(e) => setConvertUsername(e.target.value)}
+                placeholder="Enter username for new account"
+              />
+            </FormField>
+            <FormField label="PIN (6 digits, optional)">
+              <Input
+                type="password"
+                value={convertPin}
+                onChange={(e) => setConvertPin(e.target.value)}
+                placeholder="Enter 6-digit PIN"
+                maxLength={6}
+              />
+            </FormField>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConvertOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleConvertSubmit}>Convert</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

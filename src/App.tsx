@@ -26,6 +26,7 @@ import PromotionsPage from "@/features/promotions/pages/PromotionsPage";
 import ExpensesPage from "@/features/expenses/pages/ExpensesPage";
 import ReportsPage from "@/features/reports/pages/ReportsPage";
 import SettingsPage from "@/features/settings/pages/SettingsPage";
+import ChangePinPage from "@/features/settings/pages/ChangePinPage";
 import PortalApp from "@/features/portal/PortalApp";
 
 function App() {
@@ -143,6 +144,14 @@ function App() {
           element={
             <ProtectedRoute requiredRole={["OWNER", "ADMIN"]}>
               <SettingsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="settings/change-pin"
+          element={
+            <ProtectedRoute>
+              <ChangePinPage />
             </ProtectedRoute>
           }
         />

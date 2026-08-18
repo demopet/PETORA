@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, Eye } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/ui/status-badge";
 import {
@@ -16,13 +16,6 @@ const statusColors: Record<AppointmentStatus, string> = {
   IN_PROGRESS: "bg-yellow-100 text-yellow-700",
   DONE: "bg-green-100 text-green-700",
   CANCELLED: "bg-gray-100 text-gray-700",
-};
-
-const statusTransitions: Record<AppointmentStatus, AppointmentStatus[]> = {
-  WAITING: ["IN_PROGRESS", "CANCELLED"],
-  IN_PROGRESS: ["DONE", "CANCELLED"],
-  DONE: [],
-  CANCELLED: [],
 };
 
 export default function AppointmentDetailPage() {
@@ -74,17 +67,27 @@ export default function AppointmentDetailPage() {
 
   const customer = customers?.find((c) => c.id === appointment.customer_id);
   const pet = pets?.find((p) => p.id === appointment.pet_id);
-  const availableTransitions = statusTransitions[appointment.status];
+
+  const availableTransitions: AppointmentStatus[] = [];
+  if (appointment.status === "WAITING") {
+    availableTransitions.push("IN_PROGRESS", "CANCELLED");
+  }
+  if (appointment.status === "IN_PROGRESS") {
+    availableTransitions.push("DONE", "CANCELLED");
+  }
 
   const handleStatusChange = async (newStatus: AppointmentStatus) => {
-    await updateStatusMutation.mutateAsync({
-      id: appointment.id,
-      status: newStatus,
-    });
+    try {
+      const result = await updateStatusMutation.mutateAsync({
+        id: appointment.id,
+        status: newStatus,
+      });
 
-    // If transitioning to DONE, redirect to medical record creation
-    if (newStatus === "DONE") {
-      navigate(`/medical-records/new?appointmentId=${appointment.id}`);
+      if (result.promptCreateMedicalRecord) {
+        navigate(`/medical-records/new?appointmentId=${appointment.id}`);
+      }
+    } catch (e) {
+      console.error("Failed to update status", e);
     }
   };
 
@@ -97,7 +100,6 @@ export default function AppointmentDetailPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-start justify-between">
         <div>
           <Button
@@ -119,7 +121,6 @@ export default function AppointmentDetailPage() {
         <StatusBadge status={appointment.status} />
       </div>
 
-      {/* Main Info Card */}
       <div className="grid grid-cols-1 gap-6 rounded-lg bg-white p-6 shadow-sm md:grid-cols-2">
         <div>
           <p className="text-sm font-medium text-slate-500 uppercase">
@@ -169,7 +170,6 @@ export default function AppointmentDetailPage() {
         </div>
       </div>
 
-      {/* Complaint & Notes */}
       {(appointment.complaint || appointment.notes) && (
         <div className="space-y-4 rounded-lg bg-slate-50 p-6">
           {appointment.complaint && (
@@ -187,20 +187,19 @@ export default function AppointmentDetailPage() {
         </div>
       )}
 
-      {/* State Machine Actions */}
       <div className="space-y-4 rounded-lg bg-blue-50 p-6">
         <p className="text-sm font-semibold text-blue-900">Actions</p>
         <div className="flex flex-wrap gap-3">
-          {availableTransitions.map((_status) => (
+          {availableTransitions.map((status) => (
             <Button
-              key={_status}
-              onClick={() => handleStatusChange(_status)}
+              key={status}
+              onClick={() => handleStatusChange(status)}
               disabled={updateStatusMutation.isPending}
-              variant={_status === "CANCELLED" ? "outline" : "default"}
+              variant={status === "CANCELLED" ? "outline" : "default"}
             >
-              {_status === "IN_PROGRESS" && "Start Appointment"}
-              {_status === "DONE" && "Complete Appointment"}
-              {_status === "CANCELLED" && "Cancel"}
+              {status === "IN_PROGRESS" && "Start Appointment"}
+              {status === "DONE" && "Complete Appointment"}
+              {status === "CANCELLED" && "Cancel"}
             </Button>
           ))}
 
@@ -219,10 +218,8 @@ export default function AppointmentDetailPage() {
         </div>
       </div>
 
-      {/* Show link to medical record if appointment is done */}
       {appointment.status === "DONE" && (
         <div className="flex gap-2 rounded-lg border border-green-200 bg-green-50 p-4">
-          <Eye className="h-5 w-5 text-green-600" />
           <div className="flex-1">
             <p className="text-sm font-semibold text-green-900">
               Appointment completed
